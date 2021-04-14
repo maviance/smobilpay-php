@@ -40,7 +40,7 @@ $config->setHost($url);
 $client = new ApiClient($token, $secret, ['verify' => true]);
 
 // trigger request
-$apiInstance = new Maviance\S3PApiClient\Service\AccountApi($client);
+$apiInstance = new Maviance\S3PApiClient\Service\AccountApi($client,$config);
 
 try {
     $result = $apiInstance->accountGet($xApiVersion);
