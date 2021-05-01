@@ -1,4 +1,5 @@
 <?php
+
 namespace Maviance\S3PApiClient;
 
 /**
@@ -111,7 +112,7 @@ class ApiClient extends Client
                 $uri->getScheme(),
                 "://",
                 $uri->getHost(),
-                is_null($uri->getPort()) ? "" : (!in_array($uri->getPort(), [80, 443])) ? ":" . $uri->getPort() : "",
+                is_null($uri->getPort()) ? "" : ((!in_array($uri->getPort(), [80, 443])) ? ":" . $uri->getPort() : ""),
                 $uri->getPath()
             ]
         );
