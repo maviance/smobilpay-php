@@ -1,4 +1,5 @@
 <?php
+
 /**
  * InitiateApi
  * PHP version 5
@@ -158,7 +159,7 @@ class InitiateApi
                 $content = $responseBody; //stream goes to serializer
             } else {
                 $content = $responseBody->getContents();
-                if (!in_array($returnType, ['string','integer','bool'])) {
+                if (!in_array($returnType, ['string', 'integer', 'bool'])) {
                     $content = json_decode($content);
                 }
             }
@@ -168,7 +169,6 @@ class InitiateApi
                 $response->getStatusCode(),
                 $response->getHeaders()
             ];
-
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
@@ -366,10 +366,8 @@ class InitiateApi
                 }
                 // for HTTP post (form)
                 $httpBody = new MultipartStream($multipartContents);
-
             } elseif ($headers['Content-Type'] === 'application/json') {
                 $httpBody = \GuzzleHttp\json_encode($formParams);
-
             } else {
                 // for HTTP post (form)
                 $httpBody = \GuzzleHttp\Psr7\build_query($formParams);
@@ -465,7 +463,7 @@ class InitiateApi
                 $content = $responseBody; //stream goes to serializer
             } else {
                 $content = $responseBody->getContents();
-                if (!in_array($returnType, ['string','integer','bool'])) {
+                if (!in_array($returnType, ['string', 'integer', 'bool'])) {
                     $content = json_decode($content);
                 }
             }
@@ -475,7 +473,6 @@ class InitiateApi
                 $response->getStatusCode(),
                 $response->getHeaders()
             ];
-
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
@@ -640,10 +637,8 @@ class InitiateApi
                 }
                 // for HTTP post (form)
                 $httpBody = new MultipartStream($multipartContents);
-
             } elseif ($headers['Content-Type'] === 'application/json') {
                 $httpBody = \GuzzleHttp\json_encode($formParams);
-
             } else {
                 // for HTTP post (form)
                 $httpBody = \GuzzleHttp\Psr7\build_query($formParams);
@@ -679,15 +674,16 @@ class InitiateApi
      * @param  string $xApiVersion api version info (required)
      * @param  string $merchant Unique merchant code (required)
      * @param  string $serviceid Unique service Identifier (required)
-     * @param  string $serviceNumber service number with merchant (e.g. policy number with an insurance company or tax number for a governmental institution) (required)
+     * @param  string $serviceNumber service number with merchant (e.g. policy number with an insurance company or tax number for a governmental institution) (optional)
+     * @param  string $customerNumber customer number with merchant (e.g. customer number with an insurance company or account number for a governmental institution) (optional)
      *
      * @throws \Maviance\S3PApiClient\ApiException on non-2xx response
      * @throws \InvalidArgumentException
      * @return \Maviance\S3PApiClient\Model\Subscription[]
      */
-    public function subscriptionGet($xApiVersion, $merchant, $serviceid, $serviceNumber)
+    public function subscriptionGet($xApiVersion, $merchant, $serviceid, $serviceNumber = null, $customerNumber = null)
     {
-        list($response) = $this->subscriptionGetWithHttpInfo($xApiVersion, $merchant, $serviceid, $serviceNumber);
+        list($response) = $this->subscriptionGetWithHttpInfo($xApiVersion, $merchant, $serviceid, $serviceNumber, $customerNumber);
         return $response;
     }
 
@@ -699,16 +695,17 @@ class InitiateApi
      * @param  string $xApiVersion api version info (required)
      * @param  string $merchant Unique merchant code (required)
      * @param  string $serviceid Unique service Identifier (required)
-     * @param  string $serviceNumber service number with merchant (e.g. policy number with an insurance company or tax number for a governmental institution) (required)
+     * @param  string $serviceNumber service number with merchant (e.g. policy number with an insurance company or tax number for a governmental institution) (optional)
+     * @param  string $customerNumber customer number with merchant (e.g. customer number with an insurance company or account number for a governmental institution) (optional)
      *
      * @throws \Maviance\S3PApiClient\ApiException on non-2xx response
      * @throws \InvalidArgumentException
      * @return array of \Maviance\S3PApiClient\Model\Subscription[], HTTP status code, HTTP response headers (array of strings)
      */
-    public function subscriptionGetWithHttpInfo($xApiVersion, $merchant, $serviceid, $serviceNumber)
+    public function subscriptionGetWithHttpInfo($xApiVersion, $merchant, $serviceid, $serviceNumber = null, $customerNumber = null)
     {
         $returnType = '\Maviance\S3PApiClient\Model\Subscription[]';
-        $request = $this->subscriptionGetRequest($xApiVersion, $merchant, $serviceid, $serviceNumber);
+        $request = $this->subscriptionGetRequest($xApiVersion, $merchant, $serviceid, $serviceNumber, $customerNumber);
 
         try {
             $options = $this->createHttpClientOption();
@@ -743,7 +740,7 @@ class InitiateApi
                 $content = $responseBody; //stream goes to serializer
             } else {
                 $content = $responseBody->getContents();
-                if (!in_array($returnType, ['string','integer','bool'])) {
+                if (!in_array($returnType, ['string', 'integer', 'bool'])) {
                     $content = json_decode($content);
                 }
             }
@@ -753,7 +750,6 @@ class InitiateApi
                 $response->getStatusCode(),
                 $response->getHeaders()
             ];
-
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
@@ -785,14 +781,15 @@ class InitiateApi
      * @param  string $xApiVersion api version info (required)
      * @param  string $merchant Unique merchant code (required)
      * @param  string $serviceid Unique service Identifier (required)
-     * @param  string $serviceNumber service number with merchant (e.g. policy number with an insurance company or tax number for a governmental institution) (required)
+     * @param  string $serviceNumber service number with merchant (e.g. policy number with an insurance company or tax number for a governmental institution) (optional)
+     * @param  string $customerNumber customer number with merchant (e.g. customer number with an insurance company or account number for a governmental institution) (optional)
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function subscriptionGetAsync($xApiVersion, $merchant, $serviceid, $serviceNumber)
+    public function subscriptionGetAsync($xApiVersion, $merchant, $serviceid, $serviceNumber = null, $customerNumber = null)
     {
-        return $this->subscriptionGetAsyncWithHttpInfo($xApiVersion, $merchant, $serviceid, $serviceNumber)
+        return $this->subscriptionGetAsyncWithHttpInfo($xApiVersion, $merchant, $serviceid, $serviceNumber, $customerNumber)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -808,15 +805,16 @@ class InitiateApi
      * @param  string $xApiVersion api version info (required)
      * @param  string $merchant Unique merchant code (required)
      * @param  string $serviceid Unique service Identifier (required)
-     * @param  string $serviceNumber service number with merchant (e.g. policy number with an insurance company or tax number for a governmental institution) (required)
+     * @param  string $serviceNumber service number with merchant (e.g. policy number with an insurance company or tax number for a governmental institution) (optional)
+     * @param  string $customerNumber customer number with merchant (e.g. customer number with an insurance company or account number for a governmental institution) (optional)
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function subscriptionGetAsyncWithHttpInfo($xApiVersion, $merchant, $serviceid, $serviceNumber)
+    public function subscriptionGetAsyncWithHttpInfo($xApiVersion, $merchant, $serviceid, $serviceNumber = null, $customerNumber = null)
     {
         $returnType = '\Maviance\S3PApiClient\Model\Subscription[]';
-        $request = $this->subscriptionGetRequest($xApiVersion, $merchant, $serviceid, $serviceNumber);
+        $request = $this->subscriptionGetRequest($xApiVersion, $merchant, $serviceid, $serviceNumber, $customerNumber);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -861,12 +859,13 @@ class InitiateApi
      * @param  string $xApiVersion api version info (required)
      * @param  string $merchant Unique merchant code (required)
      * @param  string $serviceid Unique service Identifier (required)
-     * @param  string $serviceNumber service number with merchant (e.g. policy number with an insurance company or tax number for a governmental institution) (required)
+     * @param  string $serviceNumber service number with merchant (e.g. policy number with an insurance company or tax number for a governmental institution) (optional)
+     * @param  string $customerNumber customer number with merchant (e.g. customer number with an insurance company or account number for a governmental institution) (optional)
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    protected function subscriptionGetRequest($xApiVersion, $merchant, $serviceid, $serviceNumber)
+    protected function subscriptionGetRequest($xApiVersion, $merchant, $serviceid, $serviceNumber = null, $customerNumber = null)
     {
         // verify the required parameter 'xApiVersion' is set
         if ($xApiVersion === null || (is_array($xApiVersion) && count($xApiVersion) === 0)) {
@@ -884,12 +883,6 @@ class InitiateApi
         if ($serviceid === null || (is_array($serviceid) && count($serviceid) === 0)) {
             throw new \InvalidArgumentException(
                 'Missing the required parameter $serviceid when calling subscriptionGet'
-            );
-        }
-        // verify the required parameter 'serviceNumber' is set
-        if ($serviceNumber === null || (is_array($serviceNumber) && count($serviceNumber) === 0)) {
-            throw new \InvalidArgumentException(
-                'Missing the required parameter $serviceNumber when calling subscriptionGet'
             );
         }
 
@@ -911,6 +904,10 @@ class InitiateApi
         // query params
         if ($serviceNumber !== null) {
             $queryParams['serviceNumber'] = ObjectSerializer::toQueryValue($serviceNumber, null);
+        }
+        // query params
+        if ($customerNumber !== null) {
+            $queryParams['customerNumber'] = ObjectSerializer::toQueryValue($customerNumber, null);
         }
         // header params
         if ($xApiVersion !== null) {
@@ -951,10 +948,8 @@ class InitiateApi
                 }
                 // for HTTP post (form)
                 $httpBody = new MultipartStream($multipartContents);
-
             } elseif ($headers['Content-Type'] === 'application/json') {
                 $httpBody = \GuzzleHttp\json_encode($formParams);
-
             } else {
                 // for HTTP post (form)
                 $httpBody = \GuzzleHttp\Psr7\build_query($formParams);

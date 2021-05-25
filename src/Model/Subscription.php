@@ -66,6 +66,7 @@ class Subscription implements ModelInterface, ArrayAccess
 'localCur' => 'string',
 'amountLocalCur' => 'float',
 'customerReference' => 'string',
+'customerName' => 'string',
 'customerNumber' => 'string',
 'startDate' => '\DateTime',
 'dueDate' => '\DateTime',
@@ -89,6 +90,7 @@ class Subscription implements ModelInterface, ArrayAccess
 'localCur' => null,
 'amountLocalCur' => 'float',
 'customerReference' => null,
+'customerName' => null,
 'customerNumber' => null,
 'startDate' => 'date',
 'dueDate' => 'date',
@@ -133,6 +135,7 @@ class Subscription implements ModelInterface, ArrayAccess
 'localCur' => 'localCur',
 'amountLocalCur' => 'amountLocalCur',
 'customerReference' => 'customerReference',
+'customerName' => 'customerName',
 'customerNumber' => 'customerNumber',
 'startDate' => 'startDate',
 'dueDate' => 'dueDate',
@@ -156,6 +159,7 @@ class Subscription implements ModelInterface, ArrayAccess
 'localCur' => 'setLocalCur',
 'amountLocalCur' => 'setAmountLocalCur',
 'customerReference' => 'setCustomerReference',
+'customerName' => 'setCustomerName',
 'customerNumber' => 'setCustomerNumber',
 'startDate' => 'setStartDate',
 'dueDate' => 'setDueDate',
@@ -179,6 +183,7 @@ class Subscription implements ModelInterface, ArrayAccess
 'localCur' => 'getLocalCur',
 'amountLocalCur' => 'getAmountLocalCur',
 'customerReference' => 'getCustomerReference',
+'customerName' => 'getCustomerName',
 'customerNumber' => 'getCustomerNumber',
 'startDate' => 'getStartDate',
 'dueDate' => 'getDueDate',
@@ -271,6 +276,7 @@ self::AMOUNT_TYPE_OVERPAY,        ];
         $this->container['localCur'] = isset($data['localCur']) ? $data['localCur'] : null;
         $this->container['amountLocalCur'] = isset($data['amountLocalCur']) ? $data['amountLocalCur'] : null;
         $this->container['customerReference'] = isset($data['customerReference']) ? $data['customerReference'] : null;
+        $this->container['customerName'] = isset($data['customerName']) ? $data['customerName'] : null;
         $this->container['customerNumber'] = isset($data['customerNumber']) ? $data['customerNumber'] : null;
         $this->container['startDate'] = isset($data['startDate']) ? $data['startDate'] : null;
         $this->container['dueDate'] = isset($data['dueDate']) ? $data['dueDate'] : null;
@@ -580,6 +586,30 @@ self::AMOUNT_TYPE_OVERPAY,        ];
     public function setCustomerReference($customerReference)
     {
         $this->container['customerReference'] = $customerReference;
+
+        return $this;
+    }
+
+    /**
+     * Gets customerName
+     *
+     * @return string
+     */
+    public function getCustomerName()
+    {
+        return $this->container['customerName'];
+    }
+
+    /**
+     * Sets customerName
+     *
+     * @param string $customerName Customer Name
+     *
+     * @return $this
+     */
+    public function setCustomerName($customerName)
+    {
+        $this->container['customerName'] = $customerName;
 
         return $this;
     }
