@@ -115,11 +115,11 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
 
 # **subscriptionGet**
-> \Maviance\S3PApiClient\Model\Subscription[] subscriptionGet($xApiVersion, $merchant, $serviceid, $serviceNumber)
+> \Maviance\S3PApiClient\Model\Subscription[] subscriptionGet($xApiVersion, $merchant, $serviceid, $serviceNumber, $customerNumber)
 
 Get subscription payment handler
 
-A request to this endpoint looks up a subscription record for a service by service number and retrieves its details if available. When calling the endpoint the result set will contain a list of all available subscriptions registered under the provided service number. Each subscription has its own Payment Item Identifier.
+A request to this endpoint looks up a subscription record for a service by either service number or customer number and retrieves its details if available. When calling the endpoint the result set will contain a list of all available subscriptions found under the provided search criteria. Each subscription has its own Payment Item Identifier.
 
 ### Example
 ```php
@@ -135,9 +135,10 @@ $xApiVersion = "3.0.0"; // string | api version info
 $merchant = "merchant_example"; // string | Unique merchant code
 $serviceid = "serviceid_example"; // string | Unique service Identifier
 $serviceNumber = "serviceNumber_example"; // string | service number with merchant (e.g. policy number with an insurance company or tax number for a governmental institution)
+$customerNumber = "customerNumber_example"; // string | customer number with merchant (e.g. customer number with an insurance company or account number for a governmental institution)
 
 try {
-    $result = $apiInstance->subscriptionGet($xApiVersion, $merchant, $serviceid, $serviceNumber);
+    $result = $apiInstance->subscriptionGet($xApiVersion, $merchant, $serviceid, $serviceNumber, $customerNumber);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling InitiateApi->subscriptionGet: ', $e->getMessage(), PHP_EOL;
@@ -152,7 +153,8 @@ Name | Type | Description  | Notes
  **xApiVersion** | **string**| api version info | [default to 3.0.0]
  **merchant** | **string**| Unique merchant code |
  **serviceid** | **string**| Unique service Identifier |
- **serviceNumber** | **string**| service number with merchant (e.g. policy number with an insurance company or tax number for a governmental institution) |
+ **serviceNumber** | **string**| service number with merchant (e.g. policy number with an insurance company or tax number for a governmental institution) | [optional]
+ **customerNumber** | **string**| customer number with merchant (e.g. customer number with an insurance company or account number for a governmental institution) | [optional]
 
 ### Return type
 
