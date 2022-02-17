@@ -21,6 +21,7 @@ Name | Type | Description | Notes
 **isVerifiable** | **bool** | If set to true (1), then the service number provided for this service can be verified before making a payment request | 
 **validationMask** | **string** | Optional mask for the service number entered during a payment for client side validations. All service numbers must comply to the mask in order to pass. The mask is a PCRE regular expression | [optional] 
 **hint** | [**\Maviance\S3PApiClient\Model\I18nText[]**](I18nText.md) | Translation texts for the hint notes to be displayed to the customer for this service. | [optional] 
+**denomination** | **int** | Service payment denomination. The payment amount must be a multiple of the denomination value. Example:  |Denomination|Amount|Valid| |-----|-----|-------| |1|100|true| |5|100|true| |200|100|false| |50|60|false| | [optional] 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 

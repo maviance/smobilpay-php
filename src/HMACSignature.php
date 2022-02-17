@@ -1,9 +1,6 @@
 <?php
-
 namespace Maviance\S3PApiClient;
-
-class HMACSignature
-{
+class HMACSignature {
     /**
      * This method generates the signature based on given parameters
      *
@@ -11,8 +8,8 @@ class HMACSignature
      *
      * @return string
      */
-    public function generate($secret)
-    {
+    public function generate($secret) {
+
         $encodedString = hash_hmac('sha1', $this->getBaseString(), $secret, true);
         return base64_encode($encodedString);
     }
@@ -35,8 +32,7 @@ class HMACSignature
      * @param       $url    URL
      * @param array $params parameters to include in signature
      */
-    public function __construct($method, $url, array $params)
-    {
+    public function __construct($method, $url, array $params) {
         $this->method = $method;
         $this->url = $url;
         $this->params = $params;
@@ -48,8 +44,7 @@ class HMACSignature
      *
      * @return bool
      */
-    public function verify($signature, $secret)
-    {
+    public function verify($signature, $secret) {
         if ($signature !== $this->generate($secret)) {
             throw new \Exception("Signature Does Not Match");
         }
@@ -62,8 +57,7 @@ class HMACSignature
      *
      * @return string
      */
-    public function getBaseString()
-    {
+    public function getBaseString() {
         $glue = "&";
         $sorted = $this->getParameterString();
 
@@ -83,8 +77,7 @@ class HMACSignature
      *
      * @return string
      */
-    protected function getParameterString()
-    {
+    protected function getParameterString() {
         $glue = "&";
         $stringToBeSigned = '';
         // lexically sort parameters

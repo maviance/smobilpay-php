@@ -19,6 +19,7 @@ Name | Type | Description | Notes
 **status** | **string** | payment processing status | 
 **payItemId** | **string** | Unique  Payment Item ID for payment item identification | [optional] 
 **payItemDescr** | **string** | Contains optional description about payment details (e.g. merchant provided bill types) | [optional] 
+**errorCode** | **float** | Error code | 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 

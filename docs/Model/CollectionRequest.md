@@ -4,7 +4,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **quoteId** | **string** | Quote Number of the related quote that was previously requested. | 
-**customerPhonenumber** | **int** | Customer Phonenumber for regulatory compliance – international format with leading country code. E.g. “237699999999” for a fictional phone number 699999999 in Cameroon (237). | 
+**customerPhonenumber** | **string** | Customer Phonenumber for regulatory compliance – international format with leading country code. E.g. “237699999999” for a fictional phone number 699999999 in Cameroon (237). | 
 **customerEmailaddress** | **string** | Customer Email address for regulatory compliance. | 
 **customerName** | **string** | Customer Name for regulatory compliance - only mandatory if &lt;&lt;service.isReqCustomerName &#x3D; 1&gt;&gt; | [optional] 
 **customerAddress** | **string** | Customer Address for regulatory compliance - only mandatory if &lt;&lt;service.isReqCustomerAddress &#x3D; 1&gt;&gt; | [optional] 

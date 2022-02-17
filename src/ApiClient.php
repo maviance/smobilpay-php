@@ -1,5 +1,4 @@
 <?php
-
 namespace Maviance\S3PApiClient;
 
 /**
@@ -16,8 +15,7 @@ use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Ramsey\Uuid\Uuid;
 
-class ApiClient extends Client
-{
+class ApiClient extends Client {
     /**
      * @var
      */
@@ -34,8 +32,7 @@ class ApiClient extends Client
         parent::__construct($config);
     }
 
-    public function send(RequestInterface $request, array $options = [])
-    {
+    public function send(RequestInterface $request, array $options = []) {
         $options['headers'] = ["Authorization" => $this->buildAuthorizationHeader($request)];
         return parent::send($request, $options);
     }
@@ -49,8 +46,7 @@ class ApiClient extends Client
      * @param $data
      * @return string
      */
-    public function buildAuthorizationHeader(RequestInterface $request)
-    {
+    function buildAuthorizationHeader(RequestInterface $request) {
         $data = [];
         if ($request->getMethod() == "POST") {
             $data = \GuzzleHttp\json_decode($request->getBody()->getContents(), true);
@@ -103,18 +99,15 @@ class ApiClient extends Client
      * @param Uri $uri
      * @return string
      */
-    private function getUrl(Uri $uri)
-    {
+    private function getUrl(Uri $uri) {
         // in case ports are not standard -> add to url
-        return implode(
-            '',
+        return implode('',
             [
                 $uri->getScheme(),
                 "://",
                 $uri->getHost(),
-                is_null($uri->getPort()) ? "" : ((!in_array($uri->getPort(), [80, 443])) ? ":" . $uri->getPort() : ""),
+                is_null($uri->getPort()) ? "" : (!in_array($uri->getPort(), [80, 443])) ? ":" . $uri->getPort() : "",
                 $uri->getPath()
-            ]
-        );
+            ]);
     }
 }
