@@ -32,15 +32,16 @@ require_once(__DIR__ . '/vendor/autoload.php');
 $token = "public access key";
 $secret = "access secret";
 $url = "https://XXXXX";
+
 $xApiVersion = "3.0.0"; // string | api version info
 
 // init
-$config = new Configuration();
+$config = new \Maviance\S3PApiClient\Configuration();
 $config->setHost($url);
-$client = new ApiClient($token, $secret, ['verify' => true]);
+$client = new \Maviance\S3PApiClient\ApiClient($token, $secret, ['verify' => false]);
 
 // trigger request
-$apiInstance = new Maviance\S3PApiClient\Service\AccountApi($client,$config);
+$apiInstance = new Maviance\S3PApiClient\Service\AccountApi($client, $config);
 
 try {
     $result = $apiInstance->accountGet($xApiVersion);
