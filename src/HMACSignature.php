@@ -16,13 +16,11 @@ class HMACSignature
     public function __construct(
         private readonly string $method,
         private readonly string $url,
-        private readonly array $params
+        private array $params
     ) {
     }
 
-    /**
-     * This method generates the signature based on given parameters
-     */
+    /** This method generates the signature based on given parameters */
     public function generate(string $secret): string
     {
         $encodedString = hash_hmac('sha1', $this->getBaseString(), $secret, true);
@@ -30,9 +28,7 @@ class HMACSignature
         return base64_encode($encodedString);
     }
 
-    /**
-     * @throws Exception
-     */
+    /** @throws Exception */
     public function verify(string $signature, string $secret): bool
     {
         if ($signature !== $this->generate($secret)) {
@@ -42,9 +38,7 @@ class HMACSignature
         return true;
     }
 
-    /**
-     * compile base string
-     */
+    /** compile base string */
     public function getBaseString(): string
     {
         $glue = '&';
@@ -59,9 +53,7 @@ class HMACSignature
             $sorted;
     }
 
-    /**
-     * Prepares a string to be signed
-     */
+    /** Prepares a string to be signed */
     protected function getParameterString(): string
     {
         $glue = '&';
@@ -69,7 +61,7 @@ class HMACSignature
         // lexically sort parameters
         ksort($this->params);
         foreach ($this->params as $key => $value) {
-            $stringToBeSigned .= trim($key) . '=' . trim($value) . $glue;
+            $stringToBeSigned .= trim((string)$key) . '=' . trim((string)$value) . $glue;
         }
 
         // urlencoded and remove trailing glue
