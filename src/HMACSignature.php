@@ -1,92 +1,70 @@
 <?php
-namespace Maviance\S3PApiClient;
-class HMACSignature {
-    /**
-     * This method generates the signature based on given parameters
-     *
-     * @param array $parameters A list of parameters used for generation
-     *
-     * @return string
-     */
-    public function generate($secret) {
 
+declare(strict_types=1);
+
+namespace Maviance\S3PApiClient;
+
+use Exception;
+
+class HMACSignature
+{
+    /**
+     * @param string $method HTTP method
+     * @param string $url    URL
+     * @param array  $params parameters to include in signature
+     */
+    public function __construct(
+        private readonly string $method,
+        private readonly string $url,
+        private array $params
+    ) {
+    }
+
+    /** This method generates the signature based on given parameters */
+    public function generate(string $secret): string
+    {
         $encodedString = hash_hmac('sha1', $this->getBaseString(), $secret, true);
+
         return base64_encode($encodedString);
     }
 
-    /**
-     * @var
-     */
-    private $method;
-    /**
-     * @var
-     */
-    private $url;
-    /**
-     * @var array
-     */
-    private $params;
-
-    /**
-     * @param       $method HTTP method
-     * @param       $url    URL
-     * @param array $params parameters to include in signature
-     */
-    public function __construct($method, $url, array $params) {
-        $this->method = $method;
-        $this->url = $url;
-        $this->params = $params;
-    }
-
-    /**
-     * @param string $signature
-     * @param array $parameters
-     *
-     * @return bool
-     */
-    public function verify($signature, $secret) {
+    /** @throws Exception */
+    public function verify(string $signature, string $secret): bool
+    {
         if ($signature !== $this->generate($secret)) {
-            throw new \Exception("Signature Does Not Match");
+            throw new Exception('Signature Does Not Match');
         }
 
         return true;
     }
 
-    /**
-     * compile base string
-     *
-     * @return string
-     */
-    public function getBaseString() {
-        $glue = "&";
+    /** compile base string */
+    public function getBaseString(): string
+    {
+        $glue = '&';
         $sorted = $this->getParameterString();
 
         return
-            // capitalize httptype
+            // capitalize http type
             strtoupper(trim($this->method)) . $glue .
-            // urlencode url
+            // urlencoded url
             rawurlencode(trim($this->url)) . $glue .
             // lexically sorted parameter string
             $sorted;
     }
 
-    /**
-     * Prepares a string to be signed
-     *
-     * @param array $parameters List of signature fields
-     *
-     * @return string
-     */
-    protected function getParameterString() {
-        $glue = "&";
+    /** Prepares a string to be signed */
+    protected function getParameterString(): string
+    {
+        $glue = '&';
         $stringToBeSigned = '';
         // lexically sort parameters
         ksort($this->params);
         foreach ($this->params as $key => $value) {
-            $stringToBeSigned .= trim($key) . '=' . trim($value) . $glue;
+            $stringToBeSigned .= trim((string)$key) . '=' . trim((string)$value) . $glue;
         }
 
-        // urlencode and remove trailing glue
+        // urlencoded and remove trailing glue
         return rawurlencode(trim(substr($stringToBeSigned, 0, -1)));
     }
 }
