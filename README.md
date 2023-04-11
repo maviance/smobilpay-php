@@ -5,6 +5,8 @@ Php library for the Smobilpay S3P API
 
 > **Note**
 > Only use this branch with PHP 8.1 and above
+
+> **Note**
 > Compatbility with PHP releases < 8.1 are being maintained in the v1.0 branch
 
 ## Getting Started
@@ -103,10 +105,3 @@ Class | Method | HTTP request | Description
  - [Service](docs/Model/Service.md)
  - [Subscription](docs/Model/Subscription.md)
  - [Topup](docs/Model/Topup.md)
-
-
-## Changelog
-
-# 0.0.1
-
-Initial release of client for API level v3 based on "https://github.com/swagger-api/swagger-codegen" v3.0.24
