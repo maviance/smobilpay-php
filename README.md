@@ -2,7 +2,10 @@
 
 Php library for the Smobilpay S3P API
 
-It requires PHP version 5.5+
+
+> **Note**
+> Only use this branch with PHP 8.1 and above
+> Compatbility with PHP releases < 8.1 are being maintained in the v1.0 branch
 
 ## Getting Started
 
