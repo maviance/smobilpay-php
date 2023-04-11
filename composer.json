@@ -15,6 +15,7 @@
     ],
     "homepage": "https://www.smobilpay.cm",
     "license": "Apache-2.0",
+    "version": "v1.0.0",
     "authors": [
         {
             "name": "maviance",
