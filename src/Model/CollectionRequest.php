@@ -65,7 +65,10 @@ class CollectionRequest implements ModelInterface, ArrayAccess
         'customerAddress' => 'string',
         'customerNumber' => 'string',
         'serviceNumber' => 'string',
-        'trid' => 'string'];
+        'trid' => 'string',
+        'tag' => 'string',
+        'cdata' => 'string',
+    ];
 
     /**
      * Array of property to format mappings. Used for (de)serialization
@@ -80,7 +83,10 @@ class CollectionRequest implements ModelInterface, ArrayAccess
         'customerAddress' => null,
         'customerNumber' => null,
         'serviceNumber' => null,
-        'trid' => null];
+        'trid' => null,
+        'tag' => null,
+        'cdata' => null,
+    ];
 
     /**
      * Array of attributes where the key is the local name,
@@ -96,7 +102,10 @@ class CollectionRequest implements ModelInterface, ArrayAccess
         'customerAddress' => 'customerAddress',
         'customerNumber' => 'customerNumber',
         'serviceNumber' => 'serviceNumber',
-        'trid' => 'trid'];
+        'trid' => 'trid',
+        'tag' => 'tag',
+        'cdata' => 'cdata',
+    ];
 
     /**
      * Array of attributes to setter functions (for deserialization of responses)
@@ -111,7 +120,10 @@ class CollectionRequest implements ModelInterface, ArrayAccess
         'customerAddress' => 'setCustomerAddress',
         'customerNumber' => 'setCustomerNumber',
         'serviceNumber' => 'setServiceNumber',
-        'trid' => 'setTrid'];
+        'trid' => 'setTrid',
+        'tag' => 'setTag',
+        'cdata' => 'setCdata',
+    ];
 
     /**
      * Array of attributes to getter functions (for serialization of requests)
@@ -126,7 +138,10 @@ class CollectionRequest implements ModelInterface, ArrayAccess
         'customerAddress' => 'getCustomerAddress',
         'customerNumber' => 'getCustomerNumber',
         'serviceNumber' => 'getServiceNumber',
-        'trid' => 'getTrid'];
+        'trid' => 'getTrid',
+        'tag' => 'getTag',
+        'cdata' => 'getCdata',
+    ];
 
     /**
      * Associative array for storing property values
@@ -151,6 +166,8 @@ class CollectionRequest implements ModelInterface, ArrayAccess
         $this->container['customerNumber'] = isset($data['customerNumber']) ? $data['customerNumber'] : null;
         $this->container['serviceNumber'] = isset($data['serviceNumber']) ? $data['serviceNumber'] : null;
         $this->container['trid'] = isset($data['trid']) ? $data['trid'] : null;
+        $this->container['tag'] = isset($data['tag']) ? $data['tag'] : null;
+        $this->container['cdata'] = isset($data['cdata']) ? $data['cdata'] : null;
     }
 
     /**
@@ -455,6 +472,55 @@ class CollectionRequest implements ModelInterface, ArrayAccess
 
         return $this;
     }
+
+    /**
+     * Gets tag
+     *
+     * @return string
+     */
+    public function getTag()
+    {
+        return $this->container['tag'];
+    }
+
+    /**
+     * Sets tag
+     *
+     * @param string $tag optional custom field to be freely used for internal payment collection referencing and tagging. Will be included in payment status responses and reports
+     *
+     * @return $this
+     */
+    public function setTag($tag)
+    {
+        $this->container['tag'] = $tag;
+
+        return $this;
+    }
+
+    /**
+     * Gets cdata
+     *
+     * @return string
+     */
+    public function getCdata()
+    {
+        return $this->container['cdata'];
+    }
+
+    /**
+     * Sets cdata
+     *
+     * @param string $cdata Custom valid json string containing extended - non standard - information needed for special purpose usecases
+     *
+     * @return $this
+     */
+    public function setCdata($cdata)
+    {
+        $this->container['cdata'] = $cdata;
+
+        return $this;
+    }
+
 
     /**
      * Returns true if offset exists. False otherwise.
