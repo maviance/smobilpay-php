@@ -81,7 +81,9 @@ class CollectionResponse implements ModelInterface, ArrayAccess
         'pin' => 'string',
         'status' => 'string',
         'payItemId' => 'string',
-        'payItemDescr' => 'string'];
+        'payItemDescr' => 'string',
+        'tag' => 'string',
+    ];
 
     /**
      * Array of property to format mappings. Used for (de)serialization
@@ -102,7 +104,9 @@ class CollectionResponse implements ModelInterface, ArrayAccess
         'pin' => null,
         'status' => null,
         'payItemId' => null,
-        'payItemDescr' => null];
+        'payItemDescr' => null,
+        'tag' => null,
+    ];
 
     /**
      * Array of attributes where the key is the local name,
@@ -124,7 +128,9 @@ class CollectionResponse implements ModelInterface, ArrayAccess
         'pin' => 'pin',
         'status' => 'status',
         'payItemId' => 'payItemId',
-        'payItemDescr' => 'payItemDescr'];
+        'payItemDescr' => 'payItemDescr',
+        'tag' => 'tag',
+    ];
 
     /**
      * Array of attributes to setter functions (for deserialization of responses)
@@ -145,7 +151,9 @@ class CollectionResponse implements ModelInterface, ArrayAccess
         'pin' => 'setPin',
         'status' => 'setStatus',
         'payItemId' => 'setPayItemId',
-        'payItemDescr' => 'setPayItemDescr'];
+        'payItemDescr' => 'setPayItemDescr',
+        'tag' => 'setTag',
+    ];
 
     /**
      * Array of attributes to getter functions (for serialization of requests)
@@ -166,7 +174,9 @@ class CollectionResponse implements ModelInterface, ArrayAccess
         'pin' => 'getPin',
         'status' => 'getStatus',
         'payItemId' => 'getPayItemId',
-        'payItemDescr' => 'getPayItemDescr'];
+        'payItemDescr' => 'getPayItemDescr',
+        'tag' => 'getTag',
+    ];
 
     /**
      * Associative array for storing property values
@@ -197,6 +207,7 @@ class CollectionResponse implements ModelInterface, ArrayAccess
         $this->container['status'] = isset($data['status']) ? $data['status'] : null;
         $this->container['payItemId'] = isset($data['payItemId']) ? $data['payItemId'] : null;
         $this->container['payItemDescr'] = isset($data['payItemDescr']) ? $data['payItemDescr'] : null;
+        $this->container['tag'] = isset($data['tag']) ? $data['tag'] : null;
     }
 
     /**
@@ -694,6 +705,30 @@ class CollectionResponse implements ModelInterface, ArrayAccess
     public function setPayItemDescr($payItemDescr)
     {
         $this->container['payItemDescr'] = $payItemDescr;
+
+        return $this;
+    }
+
+    /**
+     * Gets tag
+     *
+     * @return string
+     */
+    public function getTag()
+    {
+        return $this->container['tag'];
+    }
+
+    /**
+     * Sets tag
+     *
+     * @param string $tag optional custom field to be freely used for internal payment collection referencing and tagging. Will be included in payment status responses and reports
+     *
+     * @return $this
+     */
+    public function setTag($tag)
+    {
+        $this->container['tag'] = $tag;
 
         return $this;
     }
