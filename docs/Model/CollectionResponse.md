@@ -17,6 +17,7 @@ Name | Type | Description | Notes
 **status** | **string** | payment processing status | 
 **payItemId** | **string** | Unique  Payment Item ID for payment item identification | [optional] 
 **payItemDescr** | **string** | Contains optional description about payment details (e.g. merchant provided bill types) | [optional] 
+**tag** | **string** | optional custom field to be freely used for internal payment collection referencing and tagging. Will be included in payment status responses and reports | [optional] 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 
