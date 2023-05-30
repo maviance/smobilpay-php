@@ -11,8 +11,8 @@ Name | Type | Description | Notes
 **customerNumber** | **string** | Customer number - only mandatory if &lt;&lt;service.isReqCustomerNumber &#x3D; 1&gt;&gt; | [optional] 
 **serviceNumber** | **string** | Service number – only mandatory if &lt;&lt;service.isReqServiceNumber &#x3D; 1&gt;&gt;. Usually contains the target of a payment collection. | [optional] 
 **trid** | **string** | custom external transaction reference - custom field to be freely used for internal payment collection referencing. Should be unique. **NOTE:** The API does not manage transaction references (e.g. run unique validation) – this value needs to be managed by the client’s system. | [optional] 
-**tag** | **string** | optional custom field to be freely used for internal payment collection referencing and tagging. Will be included in payment status responses and reports | [optional] 
-**cdata** | **string** |  Custom valid json string containing extended - non standard - information needed for special purpose usecases | [optional] 
+**tag** | **null|string** | optional custom field to be freely used for internal payment collection referencing and tagging. Will be included in payment status responses and reports | [optional] 
+**cdata** | **null|string** |  Custom valid json string containing extended - non standard - information needed for special purpose usecases | [optional] 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 

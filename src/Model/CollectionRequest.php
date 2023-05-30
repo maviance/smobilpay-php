@@ -476,9 +476,9 @@ class CollectionRequest implements ModelInterface, ArrayAccess
     /**
      * Gets tag
      *
-     * @return string
+     * @return null|string
      */
-    public function getTag()
+    public function getTag(): ?string
     {
         return $this->container['tag'];
     }
@@ -486,11 +486,11 @@ class CollectionRequest implements ModelInterface, ArrayAccess
     /**
      * Sets tag
      *
-     * @param string $tag optional custom field to be freely used for internal payment collection referencing and tagging. Will be included in payment status responses and reports
+     * @param null|string $tag optional custom field to be freely used for internal payment collection referencing and tagging. Will be included in payment status responses and reports
      *
      * @return $this
      */
-    public function setTag($tag)
+    public function setTag(?string $tag): self
     {
         $this->container['tag'] = $tag;
 
@@ -500,9 +500,9 @@ class CollectionRequest implements ModelInterface, ArrayAccess
     /**
      * Gets cdata
      *
-     * @return string
+     * @return null|string
      */
-    public function getCdata()
+    public function getCdata(): ?string
     {
         return $this->container['cdata'];
     }
@@ -510,11 +510,11 @@ class CollectionRequest implements ModelInterface, ArrayAccess
     /**
      * Sets cdata
      *
-     * @param string $cdata Custom valid json string containing extended - non standard - information needed for special purpose usecases
+     * @param null|string $cdata Custom valid json string containing extended - non standard - information needed for special purpose usecases
      *
      * @return $this
      */
-    public function setCdata($cdata)
+    public function setCdata(?string $cdata): self
     {
         $this->container['cdata'] = $cdata;
 
