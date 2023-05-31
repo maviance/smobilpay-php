@@ -712,9 +712,9 @@ class CollectionResponse implements ModelInterface, ArrayAccess
     /**
      * Gets tag
      *
-     * @return string
+     * @return null|string
      */
-    public function getTag()
+    public function getTag(): ?string
     {
         return $this->container['tag'];
     }
@@ -722,11 +722,11 @@ class CollectionResponse implements ModelInterface, ArrayAccess
     /**
      * Sets tag
      *
-     * @param string $tag optional custom field to be freely used for internal payment collection referencing and tagging. Will be included in payment status responses and reports
+     * @param null|string $tag optional custom field to be freely used for internal payment collection referencing and tagging. Will be included in payment status responses and reports
      *
      * @return $this
      */
-    public function setTag($tag)
+    public function setTag(?string $tag): self
     {
         $this->container['tag'] = $tag;
 
