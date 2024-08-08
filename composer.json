@@ -13,7 +13,7 @@
         "payments",
         "api"
     ],
-    "version":"v2.1.1",
+    "version":"v2.2.1",
     "homepage": "https://www.smobilpay.cm",
     "license": "Apache-2.0",
     "authors": [
