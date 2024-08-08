@@ -67,6 +67,7 @@ class CollectionRequest implements ModelInterface, ArrayAccess
         'serviceNumber' => 'string',
         'trid' => 'string',
         'tag' => 'string',
+        'callback_url' => 'string',
         'cdata' => 'string',
     ];
 
@@ -85,6 +86,7 @@ class CollectionRequest implements ModelInterface, ArrayAccess
         'serviceNumber' => null,
         'trid' => null,
         'tag' => null,
+        'callback_url' => null,
         'cdata' => null,
     ];
 
@@ -104,6 +106,7 @@ class CollectionRequest implements ModelInterface, ArrayAccess
         'serviceNumber' => 'serviceNumber',
         'trid' => 'trid',
         'tag' => 'tag',
+        'callback_url' => 'callbackUrl',
         'cdata' => 'cdata',
     ];
 
@@ -122,6 +125,7 @@ class CollectionRequest implements ModelInterface, ArrayAccess
         'serviceNumber' => 'setServiceNumber',
         'trid' => 'setTrid',
         'tag' => 'setTag',
+        'callback_url' => 'setCallbackUrl',
         'cdata' => 'setCdata',
     ];
 
@@ -140,6 +144,7 @@ class CollectionRequest implements ModelInterface, ArrayAccess
         'serviceNumber' => 'getServiceNumber',
         'trid' => 'getTrid',
         'tag' => 'getTag',
+        'callback_url' => 'getCallbackUrl',
         'cdata' => 'getCdata',
     ];
 
@@ -167,6 +172,7 @@ class CollectionRequest implements ModelInterface, ArrayAccess
         $this->container['serviceNumber'] = isset($data['serviceNumber']) ? $data['serviceNumber'] : null;
         $this->container['trid'] = isset($data['trid']) ? $data['trid'] : null;
         $this->container['tag'] = isset($data['tag']) ? $data['tag'] : null;
+        $this->container['callback_url'] = isset($data['callback_url']) ? $data['callback_url'] : null;
         $this->container['cdata'] = isset($data['cdata']) ? $data['cdata'] : null;
     }
 
@@ -493,6 +499,30 @@ class CollectionRequest implements ModelInterface, ArrayAccess
     public function setTag(?string $tag): self
     {
         $this->container['tag'] = $tag;
+
+        return $this;
+    }
+
+/**
+     * Gets callback_url
+     *
+     * @return string
+     */
+    public function getCallbackUrl()
+    {
+        return $this->container['callback_url'];
+    }
+
+    /**
+     * Sets callback_url
+     *
+     * @param string $callback_url optional additional(!) custom endpoint that is to be notified vib webhook about the payment processing status changes
+     *
+     * @return $this
+     */
+    public function setCallbackUrl($callback_url)
+    {
+        $this->container['callback_url'] = $callback_url;
 
         return $this;
     }
