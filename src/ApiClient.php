@@ -35,7 +35,23 @@ class ApiClient extends Client
         return parent::send($request, $options);
     }
 
-    /** Build S3P Authorization Header */
+    /**
+     * Builds the S3P Authorization header for an outgoing HTTP request.
+     *
+     * @param RequestInterface $request
+     *      The PSR-7 HTTP request instance for which the authorization header
+     *      is being generated.
+     *
+     * @return string
+     *      The fully formatted S3P authorization header string.
+     *
+     * @throws \Exception
+     *      If the request body contains invalid JSON during POST decoding.
+     *
+     * @throws \RuntimeException
+     *      If signature verification fails (depending on HMACSignature::verify behavior).
+     *      That is. if the signature Does Not Match with the secret provided.
+     */
     public function buildAuthorizationHeader(RequestInterface $request): string
     {
         $data = [];
@@ -74,6 +90,8 @@ class ApiClient extends Client
             array_merge($data, $params)
         );
         $signature = $sig->generate($this->secret);
+        
+        $sig->verify($signature, $this->secrat);
 
         return $auth_titleKey . ' ' .
             $auth_timestampKey . '="' . $timestamp . '"' . $separator .
