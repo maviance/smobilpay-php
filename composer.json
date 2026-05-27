@@ -40,11 +40,12 @@
         "ramsey/uuid": "^4.7"
     },
     "require-dev": {
-        "phpunit/phpunit": "^11.5",
-        "phpstan/phpstan": "^2.1",
         "friendsofphp/php-cs-fixer": "^3.65",
-        "php-http/mock-client": "^1.6",
+        "guzzlehttp/guzzle": "^7.10",
         "nyholm/psr7": "^1.8",
+        "php-http/mock-client": "^1.6",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^11.5",
         "symfony/cache": "^7.2"
     },
     "suggest": {
