@@ -54,6 +54,19 @@ final class VerifyApiTest extends ApiTestCase
         $this->client->verify()->verifyTransaction();
     }
 
+    /**
+     * Regression: the acceptance environment returns `"errorCode": null` on
+     * /v2/verifytx even though the spec types it as a number. Confirm we
+     * decode that without a SmobilpayParseException.
+     */
+    public function testVerifyTransactionAcceptsNullErrorCode(): void
+    {
+        $this->http->addResponse($this->jsonFixture(200, 'verifytx-null-errorcode.json'));
+        $rows = $this->client->verify()->verifyTransaction(ptn: 'PTN-202605020800001');
+        self::assertCount(1, $rows);
+        self::assertNull($rows[0]->errorCode);
+    }
+
     public function testHistoryByPtn(): void
     {
         $this->http->addResponse($this->jsonFixture(200, 'history.json'));

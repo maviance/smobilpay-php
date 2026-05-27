@@ -12,6 +12,9 @@ use DateTimeImmutable;
  *
  * Note: `$serviceid` is a string here even though {@see Service::$serviceid}
  * is an int — this matches the partner spec.
+ *
+ * `$errorCode` is nullable because the acceptance environment returns
+ * `null` here in practice, even though the spec types it as a number.
  */
 final readonly class PaymentStatus
 {
@@ -32,7 +35,7 @@ final readonly class PaymentStatus
         public PaymentStatusType $status,
         public ?string $payItemId,
         public ?string $payItemDescr,
-        public int $errorCode = 0,
+        public ?int $errorCode = null,
         public ?string $tag = null,
         public ?Commission $commission = null,
     ) {
