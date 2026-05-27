@@ -60,13 +60,13 @@ final class JsonSerializer
      */
     public function decode(string $body, string|array $type): mixed
     {
-        $trimmed = \trim($body);
+        $trimmed = trim($body);
         if ($trimmed === '') {
             throw new SmobilpayParseException('Cannot decode empty response body');
         }
         try {
             /** @var mixed $decoded */
-            $decoded = \json_decode($trimmed, true, 512, \JSON_THROW_ON_ERROR);
+            $decoded = json_decode($trimmed, true, 512, \JSON_THROW_ON_ERROR);
         } catch (Throwable $e) {
             throw new SmobilpayParseException(
                 'Response body is not valid JSON: ' . $e->getMessage(),
@@ -83,7 +83,7 @@ final class JsonSerializer
                 throw new SmobilpayParseException(\sprintf(
                     'Expected JSON array for list of %s, got %s',
                     $elementClass,
-                    \get_debug_type($decoded),
+                    get_debug_type($decoded),
                 ));
             }
             /** @var list<T> $out */
@@ -94,7 +94,7 @@ final class JsonSerializer
                         'Expected object at index %d of %s list, got %s',
                         (int) $i,
                         $elementClass,
-                        \get_debug_type($element),
+                        get_debug_type($element),
                     ));
                 }
                 /** @var array<string, mixed> $element */
@@ -108,7 +108,7 @@ final class JsonSerializer
             throw new SmobilpayParseException(\sprintf(
                 'Expected JSON object for %s, got %s',
                 $type,
-                \get_debug_type($decoded),
+                get_debug_type($decoded),
             ));
         }
         /** @var array<string, mixed> $decoded */
@@ -122,12 +122,12 @@ final class JsonSerializer
      */
     public function decodePrimitive(string $body): mixed
     {
-        $trimmed = \trim($body);
+        $trimmed = trim($body);
         if ($trimmed === '') {
             throw new SmobilpayParseException('Cannot decode empty response body');
         }
         try {
-            return \json_decode($trimmed, true, 16, \JSON_THROW_ON_ERROR);
+            return json_decode($trimmed, true, 16, \JSON_THROW_ON_ERROR);
         } catch (Throwable $e) {
             throw new SmobilpayParseException(
                 'Response body is not valid JSON: ' . $e->getMessage(),
@@ -143,7 +143,7 @@ final class JsonSerializer
     {
         $payload = $this->normalize($value);
         try {
-            return \json_encode($payload, \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE | \JSON_THROW_ON_ERROR);
+            return json_encode($payload, \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE | \JSON_THROW_ON_ERROR);
         } catch (Throwable $e) {
             throw new SmobilpayParseException(
                 'Failed to encode request body: ' . $e->getMessage(),
@@ -165,7 +165,7 @@ final class JsonSerializer
             foreach ($data as $k => $v) {
                 $obj->{(string) $k} = $v;
             }
-            /** @var T $obj */
+            /** @var T &stdClass $obj */
             return $obj;
         }
 
@@ -274,14 +274,14 @@ final class JsonSerializer
             };
         }
 
-        if (\is_a($name, BackedEnum::class, true)) {
+        if (is_a($name, BackedEnum::class, true)) {
             /** @var class-string<BackedEnum> $name */
             if (!\is_string($raw) && !\is_int($raw)) {
                 throw new SmobilpayParseException(\sprintf(
                     'Expected scalar for enum field "%s" of %s, got %s',
                     $param->getName(),
                     $owningClass,
-                    \get_debug_type($raw),
+                    get_debug_type($raw),
                 ));
             }
             $candidate = $name::tryFrom($raw);
@@ -298,13 +298,13 @@ final class JsonSerializer
             return $candidate;
         }
 
-        if (\is_a($name, DateTimeInterface::class, true) || $name === DateTimeImmutable::class) {
+        if (is_a($name, DateTimeInterface::class, true) || $name === DateTimeImmutable::class) {
             if (!\is_string($raw)) {
                 throw new SmobilpayParseException(\sprintf(
                     'Expected string for date field "%s" of %s, got %s',
                     $param->getName(),
                     $owningClass,
-                    \get_debug_type($raw),
+                    get_debug_type($raw),
                 ));
             }
             $parsed = LenientDateParser::parse($raw);
@@ -319,13 +319,13 @@ final class JsonSerializer
             return $parsed;
         }
 
-        if (\is_a($name, UuidInterface::class, true)) {
+        if (is_a($name, UuidInterface::class, true)) {
             if (!\is_string($raw)) {
                 throw new SmobilpayParseException(\sprintf(
                     'Expected string for UUID field "%s" of %s, got %s',
                     $param->getName(),
                     $owningClass,
-                    \get_debug_type($raw),
+                    get_debug_type($raw),
                 ));
             }
 
@@ -333,7 +333,7 @@ final class JsonSerializer
         }
 
         // Nested object — recurse
-        if (\is_array($raw) && \class_exists($name)) {
+        if (\is_array($raw) && class_exists($name)) {
             /** @var array<string, mixed> $raw */
             /** @var class-string $name */
             return $this->hydrate($name, $raw);
@@ -352,7 +352,7 @@ final class JsonSerializer
                 'Expected array for field "%s" of %s, got %s',
                 $param->getName(),
                 $owningClass,
-                \get_debug_type($raw),
+                get_debug_type($raw),
             ));
         }
 
@@ -360,7 +360,7 @@ final class JsonSerializer
         if ($listOfAttrs === []) {
             return $raw;
         }
-        /** @var ListOf $listOf */
+        /** @var ListOf<object> $listOf */
         $listOf = $listOfAttrs[0]->newInstance();
         $elementClass = $listOf->elementType;
 
@@ -373,7 +373,7 @@ final class JsonSerializer
                     $elementClass,
                     $param->getName(),
                     $owningClass,
-                    \get_debug_type($element),
+                    get_debug_type($element),
                 ));
             }
             /** @var array<string, mixed> $element */

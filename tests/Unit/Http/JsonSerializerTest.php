@@ -49,7 +49,7 @@ final class JsonSerializerTest extends TestCase
 
     public function testDecodeEnumField(): void
     {
-        $json = \json_encode([
+        $json = json_encode([
             'serviceid' => 1, 'merchant' => 'ENEO', 'title' => 't',
             'description' => null, 'category' => null,
             'country' => 'CMR', 'localCur' => 'XAF',
@@ -63,7 +63,7 @@ final class JsonSerializerTest extends TestCase
 
     public function testDecodeUnknownEnumValueThrows(): void
     {
-        $json = \json_encode([
+        $json = json_encode([
             'serviceid' => 1, 'merchant' => 'ENEO', 'title' => 't',
             'description' => null, 'category' => null,
             'country' => 'CMR', 'localCur' => 'XAF',
@@ -113,7 +113,7 @@ final class JsonSerializerTest extends TestCase
 
     public function testDecodeNestedListOf(): void
     {
-        $json = \json_encode([
+        $json = json_encode([
             'serviceid' => 1, 'merchant' => 'ENEO', 'title' => 't',
             'description' => null, 'category' => null,
             'country' => 'CMR', 'localCur' => 'XAF',
@@ -135,8 +135,10 @@ final class JsonSerializerTest extends TestCase
     {
         // AmountType inside an object — exercised via Cashout for instance,
         // but here we use a minimal object to check the principle.
-        $obj = new class(AmountType::FIXED) {
-            public function __construct(public readonly AmountType $amountType) {}
+        $obj = new class (AmountType::FIXED) {
+            public function __construct(public readonly AmountType $amountType)
+            {
+            }
         };
         $json = $this->s()->encode($obj);
         self::assertSame('{"amountType":"FIXED"}', $json);

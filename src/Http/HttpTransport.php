@@ -6,7 +6,6 @@ namespace Maviance\Smobilpay\Http;
 
 use Maviance\Smobilpay\Auth\OAuth2TokenManager;
 use Maviance\Smobilpay\Exception\SmobilpayApiException;
-use Maviance\Smobilpay\Exception\SmobilpayParseException;
 use Maviance\Smobilpay\Exception\SmobilpayTransportException;
 use Maviance\Smobilpay\Model\ApiError;
 use Maviance\Smobilpay\SmobilpayConfig;
@@ -108,8 +107,8 @@ final class HttpTransport
 
     private function resolveUri(string $path, QueryParams $query): string
     {
-        $base = \rtrim($this->config->baseUrl, '/');
-        $p = \str_starts_with($path, '/') ? $path : '/' . $path;
+        $base = rtrim($this->config->baseUrl, '/');
+        $p = str_starts_with($path, '/') ? $path : '/' . $path;
         $uri = $base . $p;
         if (!$query->isEmpty()) {
             $uri .= '?' . $query->encode();
@@ -150,12 +149,12 @@ final class HttpTransport
 
     private function tryParseError(string $body): ?ApiError
     {
-        if (\trim($body) === '') {
+        if (trim($body) === '') {
             return null;
         }
         try {
             $parsed = $this->serializer->decode($body, ApiError::class);
-        } catch (SmobilpayParseException | Throwable) {
+        } catch (Throwable) {
             return null;
         }
 

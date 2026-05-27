@@ -44,7 +44,7 @@ final class AccountValidationApi
                 ->add('serviceNumber', $serviceNumber),
         );
 
-        return \trim($body) === 'true';
+        return trim($body) === 'true';
     }
 
     /**

@@ -11,14 +11,14 @@ $autoloadPaths = [
     __DIR__ . '/../../autoload.php',                     // alternate vendor layout
 ];
 foreach ($autoloadPaths as $candidate) {
-    if (\file_exists($candidate)) {
+    if (file_exists($candidate)) {
         require $candidate;
         break;
     }
 }
 
-if (!\class_exists(\Maviance\Smobilpay\Samples\SmokeTest::class)) {
-    \fwrite(STDERR, "Composer autoload not found. Run `composer install` first.\n");
+if (!class_exists(\Maviance\Smobilpay\Samples\SmokeTest::class)) {
+    fwrite(STDERR, "Composer autoload not found. Run `composer install` first.\n");
     exit(2);
 }
 

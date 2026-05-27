@@ -62,7 +62,7 @@ final readonly class SmobilpayConfig
         if ($baseUrl === '') {
             throw new SmobilpayConfigException('SmobilpayConfig: baseUrl is required');
         }
-        if (!\preg_match('#^https?://#i', $baseUrl)) {
+        if (!preg_match('#^https?://#i', $baseUrl)) {
             throw new SmobilpayConfigException(\sprintf(
                 'SmobilpayConfig: baseUrl must start with http:// or https://, got "%s"',
                 $baseUrl,

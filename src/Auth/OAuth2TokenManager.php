@@ -53,7 +53,7 @@ final class OAuth2TokenManager
     ) {
         $this->clock = $clock ?? new SystemClock();
         $this->cacheKey = self::CACHE_KEY_PREFIX
-            . \hash('sha256', $config->baseUrl . ':' . $config->publicKey);
+            . hash('sha256', $config->baseUrl . ':' . $config->publicKey);
     }
 
     /**
@@ -133,7 +133,7 @@ final class OAuth2TokenManager
 
     private function mintToken(DateTimeImmutable $issuedAt): OAuth2Token
     {
-        $tokenUri = \rtrim($this->config->baseUrl, '/') . self::TOKEN_PATH;
+        $tokenUri = rtrim($this->config->baseUrl, '/') . self::TOKEN_PATH;
         $request = $this->requestFactory->createRequest('POST', $tokenUri)
             ->withHeader('Authorization', 'Basic ' . $this->basicCredentials())
             ->withHeader('Content-Type', 'application/x-www-form-urlencoded')
@@ -172,7 +172,7 @@ final class OAuth2TokenManager
     {
         try {
             /** @var mixed $decoded */
-            $decoded = \json_decode($body, true, 512, \JSON_THROW_ON_ERROR);
+            $decoded = json_decode($body, true, 512, \JSON_THROW_ON_ERROR);
         } catch (Throwable $e) {
             throw new SmobilpayAuthException(
                 200,
@@ -182,22 +182,31 @@ final class OAuth2TokenManager
             );
         }
         if (!\is_array($decoded)) {
-            throw new SmobilpayAuthException(200, null,
-                'OAuth token response did not decode to an object');
+            throw new SmobilpayAuthException(
+                200,
+                null,
+                'OAuth token response did not decode to an object',
+            );
         }
         if (!isset($decoded['access_token']) || !\is_string($decoded['access_token'])
             || $decoded['access_token'] === '') {
-            throw new SmobilpayAuthException(200, null,
-                'OAuth token response missing required field "access_token"');
+            throw new SmobilpayAuthException(
+                200,
+                null,
+                'OAuth token response missing required field "access_token"',
+            );
         }
         if (!isset($decoded['expires_in']) || !\is_int($decoded['expires_in'])) {
             // Some servers return expires_in as a string; allow both.
             if (isset($decoded['expires_in']) && \is_string($decoded['expires_in'])
-                && \ctype_digit($decoded['expires_in'])) {
+                && ctype_digit($decoded['expires_in'])) {
                 $decoded['expires_in'] = (int) $decoded['expires_in'];
             } else {
-                throw new SmobilpayAuthException(200, null,
-                    'OAuth token response missing or invalid required field "expires_in"');
+                throw new SmobilpayAuthException(
+                    200,
+                    null,
+                    'OAuth token response missing or invalid required field "expires_in"',
+                );
             }
         }
         $tokenType = (isset($decoded['token_type']) && \is_string($decoded['token_type'])
@@ -239,7 +248,7 @@ final class OAuth2TokenManager
         }
         try {
             /** @var mixed $decoded */
-            $decoded = \json_decode($body, true, 16, \JSON_THROW_ON_ERROR);
+            $decoded = json_decode($body, true, 16, \JSON_THROW_ON_ERROR);
         } catch (Throwable) {
             return null;
         }
@@ -252,6 +261,6 @@ final class OAuth2TokenManager
 
     private function basicCredentials(): string
     {
-        return \base64_encode($this->config->publicKey . ':' . $this->config->secretKey);
+        return base64_encode($this->config->publicKey . ':' . $this->config->secretKey);
     }
 }

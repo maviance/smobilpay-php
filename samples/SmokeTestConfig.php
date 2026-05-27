@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Maviance\Smobilpay\Samples;
 
+use RuntimeException;
+use Throwable;
+
 /**
  * Configuration record for {@see SmokeTest}, loaded from a single JSON file
  * with the same schema as the Java client's smoke-test.json.
@@ -57,21 +60,21 @@ final readonly class SmokeTestConfig
      */
     public static function fromJsonFile(string $path): self
     {
-        if (!\is_file($path)) {
+        if (!is_file($path)) {
             throw new SmokeTestConfigException(
-                'Config file not found at ' . \realpath($path) ?: $path
-                . ". Pass a path as the first argument, set SMOBILPAY_SMOKE_CONFIG,"
-                . " or create ./smoke-test.json (see smoke-test.example.json).",
+                'Config file not found at ' . realpath($path) ?: $path
+                . '. Pass a path as the first argument, set SMOBILPAY_SMOKE_CONFIG,'
+                . ' or create ./smoke-test.json (see smoke-test.example.json).',
             );
         }
-        $raw = \file_get_contents($path);
+        $raw = file_get_contents($path);
         if ($raw === false) {
             throw new SmokeTestConfigException("Could not read {$path}");
         }
         try {
             /** @var mixed $data */
-            $data = \json_decode($raw, true, 512, \JSON_THROW_ON_ERROR);
-        } catch (\Throwable $e) {
+            $data = json_decode($raw, true, 512, \JSON_THROW_ON_ERROR);
+        } catch (Throwable $e) {
             throw new SmokeTestConfigException("Could not parse {$path}: " . $e->getMessage(), $e);
         }
         if (!\is_array($data)) {
@@ -116,6 +119,6 @@ final readonly class SmokeTestConfig
     }
 }
 
-final class SmokeTestConfigException extends \RuntimeException
+final class SmokeTestConfigException extends RuntimeException
 {
 }

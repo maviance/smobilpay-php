@@ -11,6 +11,7 @@ use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
+use RuntimeException;
 
 /**
  * Base class for per-API integration tests.
@@ -54,12 +55,12 @@ abstract class ApiTestCase extends TestCase
     protected function jsonFixture(int $status, string $filename): Response
     {
         $path = __DIR__ . '/../Fixtures/' . $filename;
-        if (!\is_file($path)) {
-            throw new \RuntimeException("Fixture not found: {$filename}");
+        if (!is_file($path)) {
+            throw new RuntimeException("Fixture not found: {$filename}");
         }
-        $body = \file_get_contents($path);
+        $body = file_get_contents($path);
         if ($body === false) {
-            throw new \RuntimeException("Failed to read fixture: {$filename}");
+            throw new RuntimeException("Failed to read fixture: {$filename}");
         }
 
         return new Response(

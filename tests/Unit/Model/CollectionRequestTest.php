@@ -34,10 +34,10 @@ final class CollectionRequestTest extends TestCase
             quoteId: $this->uuid(),
             customerPhonenumber: '237699999999',
             customerEmailaddress: 'c@example.com',
-            tag: \str_repeat('x', 50),
+            tag: str_repeat('x', 50),
         );
         self::assertNotNull($req->tag);
-        self::assertSame(50, \mb_strlen($req->tag));
+        self::assertSame(50, mb_strlen($req->tag));
     }
 
     public function testTagOver50CharsRejected(): void
@@ -47,20 +47,20 @@ final class CollectionRequestTest extends TestCase
             quoteId: $this->uuid(),
             customerPhonenumber: '237699999999',
             customerEmailaddress: 'c@example.com',
-            tag: \str_repeat('x', 51),
+            tag: str_repeat('x', 51),
         );
     }
 
     public function testCallbackUrlAt255CharsIsAccepted(): void
     {
-        $url = 'https://example.com/' . \str_repeat('a', 255 - 20);
+        $url = 'https://example.com/' . str_repeat('a', 255 - 20);
         $req = new CollectionRequest(
             quoteId: $this->uuid(),
             customerPhonenumber: '237699999999',
             customerEmailaddress: 'c@example.com',
             callbackUrl: $url,
         );
-        self::assertSame(255, \mb_strlen($req->callbackUrl ?? ''));
+        self::assertSame(255, mb_strlen($req->callbackUrl ?? ''));
     }
 
     public function testCallbackUrlOver255CharsRejected(): void
@@ -70,7 +70,7 @@ final class CollectionRequestTest extends TestCase
             quoteId: $this->uuid(),
             customerPhonenumber: '237699999999',
             customerEmailaddress: 'c@example.com',
-            callbackUrl: 'https://example.com/' . \str_repeat('a', 256),
+            callbackUrl: 'https://example.com/' . str_repeat('a', 256),
         );
     }
 

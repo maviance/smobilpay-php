@@ -19,13 +19,13 @@ use Attribute;
  * Without the attribute the decoder leaves the JSON array as a plain
  * associative array.
  *
- * @phpstan-template T of object
+ * @template T of object
  */
 #[Attribute(Attribute::TARGET_PARAMETER)]
 final class ListOf
 {
     /**
-     * @param class-string $elementType
+     * @param class-string<T> $elementType
      */
     public function __construct(public readonly string $elementType)
     {

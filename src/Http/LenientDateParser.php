@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Maviance\Smobilpay\Http;
 
 use DateTimeImmutable;
+use DateTimeInterface;
 use DateTimeZone;
 use Maviance\Smobilpay\Exception\SmobilpayParseException;
 use Throwable;
@@ -34,7 +35,7 @@ final class LenientDateParser
 {
     private const FORMATS = [
         'Y-m-d',
-        \DateTimeInterface::ATOM,
+        DateTimeInterface::ATOM,
         'Y-m-d\TH:i:sP',
         'Y-m-d\TH:i:s\Z',
         'Y-m-d\TH:i:s',
@@ -48,7 +49,7 @@ final class LenientDateParser
         if ($text === null) {
             return null;
         }
-        $trimmed = \trim($text);
+        $trimmed = trim($text);
         if ($trimmed === '') {
             return null;
         }

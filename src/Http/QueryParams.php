@@ -65,10 +65,10 @@ final class QueryParams
         }
         $parts = [];
         foreach ($this->entries as [$name, $value]) {
-            $parts[] = \rawurlencode($name) . '=' . \rawurlencode($value);
+            $parts[] = rawurlencode($name) . '=' . rawurlencode($value);
         }
 
-        return \implode('&', $parts);
+        return implode('&', $parts);
     }
 
     private function stringify(string|int|float|bool|BackedEnum|DateTimeInterface|Stringable $value): string
@@ -84,7 +84,7 @@ final class QueryParams
         }
         if (\is_float($value)) {
             // Avoid scientific notation; mirrors PHP default casting but stable for tests.
-            return \rtrim(\rtrim(\sprintf('%.14F', $value), '0'), '.');
+            return rtrim(rtrim(\sprintf('%.14F', $value), '0'), '.');
         }
 
         return (string) $value;

@@ -16,6 +16,8 @@ use Maviance\Smobilpay\SmobilpayClient;
 use Maviance\Smobilpay\SmobilpayConfig;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
+use ReflectionClass;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -62,7 +64,7 @@ final class SmokeTest
         // Skip $argv[0] (script name); collect flags and the first positional arg.
         for ($i = 1; $i < \count($argv); $i++) {
             $a = $argv[$i];
-            if (\str_starts_with($a, '--')) {
+            if (str_starts_with($a, '--')) {
                 $flags[] = $a;
             } elseif ($pathArg === null) {
                 $pathArg = $a;
@@ -78,7 +80,7 @@ final class SmokeTest
         try {
             $cfg = SmokeTestConfig::fromJsonFile($path);
         } catch (SmokeTestConfigException $e) {
-            \fwrite(STDERR, 'Configuration error: ' . $e->getMessage() . PHP_EOL);
+            fwrite(STDERR, 'Configuration error: ' . $e->getMessage() . PHP_EOL);
 
             return 2;
         }
@@ -145,7 +147,7 @@ final class SmokeTest
             $first = $client->tokens()->accessToken();
             $forced = $client->tokens()->refresh();
             if ($forced === '') {
-                throw new \RuntimeException('refresh returned empty token');
+                throw new RuntimeException('refresh returned empty token');
             }
             $client->verify()->ping();
             $this->detail('first  bearer prefix: ' . $this->jwtPrefix($first) . '...');
@@ -171,7 +173,7 @@ final class SmokeTest
         $this->run('Merchant catalog', function () use ($client): void {
             $merchants = $client->masterdata()->merchants();
             $this->detail('merchants: ' . \count($merchants));
-            $sample = \min(5, \count($merchants));
+            $sample = min(5, \count($merchants));
             for ($i = 0; $i < $sample; $i++) {
                 $m = $merchants[$i];
                 $this->detail("  - {$m->merchant} : {$m->name} ({$m->country}, {$m->status->value})");
@@ -192,19 +194,23 @@ final class SmokeTest
             foreach ($services as $s) {
                 $byType[$s->type->value] = ($byType[$s->type->value] ?? 0) + 1;
             }
-            \ksort($byType);
+            ksort($byType);
             $this->detail('distribution by type:');
             foreach ($byType as $t => $c) {
                 $this->detail("  - {$t}: {$c}");
             }
             $this->listServicesOfType($services, ServiceType::VOUCHER, 'VOUCHER services');
             $this->listServicesOfType($services, ServiceType::SUBSCRIPTION, 'SUBSCRIPTION services');
-            $verifiable = \array_values(\array_filter($services, fn ($s) => $s->isVerifiable));
+            $verifiable = array_values(array_filter($services, fn ($s) => $s->isVerifiable));
             if ($verifiable !== []) {
                 $this->detail("verifiable services (isVerifiable=true) — candidates for the 'verify' block:");
                 foreach ($verifiable as $s) {
-                    $this->detail(\sprintf('  - serviceId=%d merchant=%s title=%s',
-                        $s->serviceid, $s->merchant, $s->title));
+                    $this->detail(\sprintf(
+                        '  - serviceId=%d merchant=%s title=%s',
+                        $s->serviceid,
+                        $s->merchant,
+                        $s->title,
+                    ));
                 }
             }
         });
@@ -215,14 +221,18 @@ final class SmokeTest
      */
     private function listServicesOfType(array $services, ServiceType $type, string $label): void
     {
-        $matches = \array_values(\array_filter($services, fn ($s) => $s->type === $type));
+        $matches = array_values(array_filter($services, fn ($s) => $s->type === $type));
         if ($matches === []) {
             return;
         }
         $this->detail($label . ':');
         foreach ($matches as $s) {
-            $this->detail(\sprintf('  - serviceId=%d merchant=%s title=%s',
-                $s->serviceid, $s->merchant, $s->title));
+            $this->detail(\sprintf(
+                '  - serviceId=%d merchant=%s title=%s',
+                $s->serviceid,
+                $s->merchant,
+                $s->title,
+            ));
         }
     }
 
@@ -235,12 +245,17 @@ final class SmokeTest
             }
             $items = $client->masterdata()->cashouts(serviceid: $c['serviceId']);
             if ($items === []) {
-                throw new \RuntimeException('no cashout items for serviceId=' . $c['serviceId']);
+                throw new RuntimeException('no cashout items for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(\sprintf('picked: %s (%s, %s, local=%s %s)',
-                $item->payItemId, $item->name ?? '', $item->amountType->value,
-                $item->amountLocalCur ?? 'null', $item->localCur));
+            $this->detail(\sprintf(
+                'picked: %s (%s, %s, local=%s %s)',
+                $item->payItemId,
+                $item->name ?? '',
+                $item->amountType->value,
+                $item->amountLocalCur ?? 'null',
+                $item->localCur,
+            ));
             $this->quoteAndReport($client, $item, $c['amount']);
         });
     }
@@ -254,16 +269,22 @@ final class SmokeTest
             }
             $bills = $client->initiate()->bills($c['merchant'], $c['serviceId'], $c['serviceNumber']);
             if ($bills === []) {
-                throw new \RuntimeException(\sprintf(
+                throw new RuntimeException(\sprintf(
                     'no bills for %s/%d/%s',
-                    $c['merchant'], $c['serviceId'], $c['serviceNumber'],
+                    $c['merchant'],
+                    $c['serviceId'],
+                    $c['serviceNumber'],
                 ));
             }
             $bill = $bills[0];
-            $this->detail(\sprintf('picked: %s (%s, amount=%s %s, due=%s)',
-                $bill->payItemId, $bill->billType?->value ?? 'null',
-                $bill->amountLocalCur ?? 'null', $bill->localCur,
-                $bill->billDueDate?->format('Y-m-d') ?? 'null'));
+            $this->detail(\sprintf(
+                'picked: %s (%s, amount=%s %s, due=%s)',
+                $bill->payItemId,
+                $bill->billType?->value ?? 'null',
+                $bill->amountLocalCur ?? 'null',
+                $bill->localCur,
+                $bill->billDueDate?->format('Y-m-d') ?? 'null',
+            ));
             $amount = (int) ($bill->amountLocalCur ?? 0);
             $this->quoteAndReport($client, $bill, $amount);
         });
@@ -278,12 +299,17 @@ final class SmokeTest
             }
             $items = $client->masterdata()->topups(serviceid: $c['serviceId']);
             if ($items === []) {
-                throw new \RuntimeException('no topup items for serviceId=' . $c['serviceId']);
+                throw new RuntimeException('no topup items for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(\sprintf('picked: %s (%s, %s, local=%s %s)',
-                $item->payItemId, $item->name ?? '', $item->amountType->value,
-                $item->amountLocalCur ?? 'null', $item->localCur));
+            $this->detail(\sprintf(
+                'picked: %s (%s, %s, local=%s %s)',
+                $item->payItemId,
+                $item->name ?? '',
+                $item->amountType->value,
+                $item->amountLocalCur ?? 'null',
+                $item->localCur,
+            ));
             $this->quoteAndReport($client, $item, $c['amount']);
         });
     }
@@ -305,12 +331,17 @@ final class SmokeTest
                 throw $e;
             }
             if ($items === []) {
-                throw new \RuntimeException('no vouchers for serviceId=' . $c['serviceId']);
+                throw new RuntimeException('no vouchers for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(\sprintf('picked: %s (%s, %s, local=%s %s)',
-                $item->payItemId, $item->name ?? '', $item->amountType->value,
-                $item->amountLocalCur ?? 'null', $item->localCur));
+            $this->detail(\sprintf(
+                'picked: %s (%s, %s, local=%s %s)',
+                $item->payItemId,
+                $item->name ?? '',
+                $item->amountType->value,
+                $item->amountLocalCur ?? 'null',
+                $item->localCur,
+            ));
             $this->quoteAndReport($client, $item, $this->resolveAmount($item, $c['amount'] ?? null));
         });
     }
@@ -324,12 +355,17 @@ final class SmokeTest
             }
             $items = $client->masterdata()->products(serviceid: $c['serviceId']);
             if ($items === []) {
-                throw new \RuntimeException('no products for serviceId=' . $c['serviceId']);
+                throw new RuntimeException('no products for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(\sprintf('picked: %s (%s, %s, local=%s %s)',
-                $item->payItemId, $item->name ?? '', $item->amountType->value,
-                $item->amountLocalCur ?? 'null', $item->localCur));
+            $this->detail(\sprintf(
+                'picked: %s (%s, %s, local=%s %s)',
+                $item->payItemId,
+                $item->name ?? '',
+                $item->amountType->value,
+                $item->amountLocalCur ?? 'null',
+                $item->localCur,
+            ));
             $this->quoteAndReport($client, $item, $this->resolveAmount($item, $c['amount'] ?? null));
         });
     }
@@ -351,13 +387,18 @@ final class SmokeTest
                 $c['customerNumber'] ?? null,
             );
             if ($subs === []) {
-                throw new \RuntimeException('no subscriptions for ' . $c['merchant'] . '/' . $c['serviceId']);
+                throw new RuntimeException('no subscriptions for ' . $c['merchant'] . '/' . $c['serviceId']);
             }
             $sub = $subs[0];
-            $this->detail(\sprintf('picked: %s (%s, customer=%s, amount=%s %s, due=%s)',
-                $sub->payItemId, $sub->name ?? '', $sub->customerName ?? 'null',
-                $sub->amountLocalCur ?? 'null', $sub->localCur,
-                $sub->dueDate?->format('Y-m-d') ?? 'null'));
+            $this->detail(\sprintf(
+                'picked: %s (%s, customer=%s, amount=%s %s, due=%s)',
+                $sub->payItemId,
+                $sub->name ?? '',
+                $sub->customerName ?? 'null',
+                $sub->amountLocalCur ?? 'null',
+                $sub->localCur,
+                $sub->dueDate?->format('Y-m-d') ?? 'null',
+            ));
             $this->quoteAndReport($client, $sub, $this->resolveAmount($sub, $c['amount'] ?? null));
         });
     }
@@ -371,12 +412,17 @@ final class SmokeTest
             }
             $items = $client->masterdata()->cashins(serviceid: $c['serviceId']);
             if ($items === []) {
-                throw new \RuntimeException('no cashin items for serviceId=' . $c['serviceId']);
+                throw new RuntimeException('no cashin items for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(\sprintf('picked: %s (%s, %s, local=%s %s)',
-                $item->payItemId, $item->name ?? '', $item->amountType->value,
-                $item->amountLocalCur ?? 'null', $item->localCur));
+            $this->detail(\sprintf(
+                'picked: %s (%s, %s, local=%s %s)',
+                $item->payItemId,
+                $item->name ?? '',
+                $item->amountType->value,
+                $item->amountLocalCur ?? 'null',
+                $item->localCur,
+            ));
             $this->quoteAndReport($client, $item, $c['amount']);
         });
     }
@@ -390,11 +436,17 @@ final class SmokeTest
             }
             try {
                 $valid = $client->accountValidation()->verifyServiceNumber(
-                    $c['merchant'], $c['serviceId'], $c['serviceNumber'],
+                    $c['merchant'],
+                    $c['serviceId'],
+                    $c['serviceNumber'],
                 );
-                $this->detail(\sprintf('%s for %s/%d -> %s',
-                    $c['serviceNumber'], $c['merchant'], $c['serviceId'],
-                    $valid ? 'valid' : 'invalid'));
+                $this->detail(\sprintf(
+                    '%s for %s/%d -> %s',
+                    $c['serviceNumber'],
+                    $c['merchant'],
+                    $c['serviceId'],
+                    $valid ? 'valid' : 'invalid',
+                ));
             } catch (SmobilpayApiException $e) {
                 if ($e->error()?->respCode === 40408) {
                     $this->skip("service {$c['merchant']}/{$c['serviceId']} does not support pre-payment verification (respCode 40408)");
@@ -435,13 +487,17 @@ final class SmokeTest
             $rows = $client->verify()->historyByDateRange($weekAgo, $today);
             $this->detail("range:        {$weekAgo->format('Y-m-d')} -> {$today->format('Y-m-d')}");
             $this->detail('transactions: ' . \count($rows));
-            $sample = \min(3, \count($rows));
+            $sample = min(3, \count($rows));
             for ($i = 0; $i < $sample; $i++) {
                 $s = $rows[$i];
-                $this->detail(\sprintf('  - %s : %s, %s %s, trid=%s',
-                    $s->ptn, $s->status->value,
-                    $s->priceLocalCur ?? 'null', $s->localCur ?? '',
-                    $s->trid ?? 'null'));
+                $this->detail(\sprintf(
+                    '  - %s : %s, %s %s, trid=%s',
+                    $s->ptn,
+                    $s->status->value,
+                    $s->priceLocalCur ?? 'null',
+                    $s->localCur ?? '',
+                    $s->trid ?? 'null',
+                ));
             }
         });
     }
@@ -451,7 +507,7 @@ final class SmokeTest
     private function quoteAndReport(SmobilpayClient $client, PaymentItem $item, int $amount): void
     {
         if ($amount < 1) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 'cannot quote with amount=' . $amount . ' — set "amount" in this block of smoke-test.json',
             );
         }
@@ -477,7 +533,7 @@ final class SmokeTest
         if ($local !== null && $local >= 1.0) {
             return (int) $local;
         }
-        throw new \RuntimeException(\sprintf(
+        throw new RuntimeException(\sprintf(
             'item %s has no fixed catalog amount. Set "amount" in this block of smoke-test.json.',
             $item->payItemId ?? '?',
         ));
@@ -515,7 +571,7 @@ final class SmokeTest
             }
         } catch (Throwable $e) {
             $this->failed++;
-            echo 'FAIL ' . $name . ' - ' . (new \ReflectionClass($e))->getShortName()
+            echo 'FAIL ' . $name . ' - ' . (new ReflectionClass($e))->getShortName()
                 . ': ' . $e->getMessage() . PHP_EOL;
         }
     }
@@ -565,12 +621,12 @@ final class SmokeTest
             '/(bearer prefix: )[A-Za-z0-9._-]+/i' => '$1<JWT>',
         ];
 
-        return \preg_replace(\array_keys($patterns), \array_values($patterns), $line) ?? $line;
+        return preg_replace(array_keys($patterns), array_values($patterns), $line) ?? $line;
     }
 
     private function redactBaseUrl(string $baseUrl): string
     {
-        return \rtrim($baseUrl, '/');
+        return rtrim($baseUrl, '/');
     }
 
     private function redactKey(string $key): string
@@ -579,12 +635,12 @@ final class SmokeTest
             return '****';
         }
 
-        return \substr($key, 0, 4) . '...' . \substr($key, -2);
+        return substr($key, 0, 4) . '...' . substr($key, -2);
     }
 
     private function jwtPrefix(string $jwt): string
     {
-        return \substr($jwt, 0, 12);
+        return substr($jwt, 0, 12);
     }
 
     /**
@@ -598,7 +654,7 @@ final class SmokeTest
             // PSR-18 client. For dev convenience the smoke test uses a
             // MockClient-free composer-provided HTTP client if available.
             $clientClass = '\\GuzzleHttp\\Client';
-            if (\class_exists($clientClass)) {
+            if (class_exists($clientClass)) {
                 /** @var \Psr\Http\Client\ClientInterface $client */
                 $client = new $clientClass([
                     'timeout' => $this->cfg !== null ? 30 : 30,
@@ -608,13 +664,13 @@ final class SmokeTest
                 return [$client, $factory];
             }
             // Try Symfony HttpClient -> PSR-18 adapter.
-            if (\class_exists('\\Symfony\\Component\\HttpClient\\Psr18Client')) {
+            if (class_exists('\\Symfony\\Component\\HttpClient\\Psr18Client')) {
                 /** @var \Psr\Http\Client\ClientInterface $client */
                 $client = new \Symfony\Component\HttpClient\Psr18Client();
 
                 return [$client, $factory];
             }
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 'No PSR-18 HTTP client implementation found on the classpath. '
                 . 'Install one with: composer require guzzlehttp/guzzle. '
                 . 'Or rerun with --offline to replay test fixtures.',
@@ -648,7 +704,7 @@ final class SmokeTest
         $fixturesDir = __DIR__ . '/../tests/Fixtures';
         $load = static function (string $name) use ($fixturesDir): Response {
             $path = $fixturesDir . '/' . $name;
-            $body = \file_get_contents($path);
+            $body = file_get_contents($path);
             \assert($body !== false, "missing fixture: {$name}");
 
             return new Response(200, ['Content-Type' => 'application/json'], $body);
@@ -701,7 +757,7 @@ final class SmokeTest
         if ($arg !== null && $arg !== '') {
             return $arg;
         }
-        $env = \getenv('SMOBILPAY_SMOKE_CONFIG');
+        $env = getenv('SMOBILPAY_SMOKE_CONFIG');
         if (\is_string($env) && $env !== '') {
             return $env;
         }
@@ -712,33 +768,33 @@ final class SmokeTest
     private static function printHelp(): void
     {
         echo <<<HELP
-smoke-test — exercise the smobilpay-php-client against a real (or fixture-backed) partner env.
+            smoke-test — exercise the smobilpay-php-client against a real (or fixture-backed) partner env.
 
-USAGE
-  smoke-test [PATH] [--offline] [--strip-volatile]
+            USAGE
+              smoke-test [PATH] [--offline] [--strip-volatile]
 
-CONFIG RESOLUTION (in order):
-  1. PATH positional argument
-  2. SMOBILPAY_SMOKE_CONFIG environment variable
-  3. ./smoke-test.json in the current working directory
+            CONFIG RESOLUTION (in order):
+              1. PATH positional argument
+              2. SMOBILPAY_SMOKE_CONFIG environment variable
+              3. ./smoke-test.json in the current working directory
 
-FLAGS
-  --offline         Replay fixture JSON instead of hitting the network. Useful as
-                    a self-documenting demo and to smoke-test the harness itself.
-  --strip-volatile  Scrub timestamps, JWT prefixes, UUIDs and PTNs from detail
-                    lines so the output diffs cleanly against the Java client's
-                    `./gradlew runSmokeTest`. Same regex on both sides.
+            FLAGS
+              --offline         Replay fixture JSON instead of hitting the network. Useful as
+                                a self-documenting demo and to smoke-test the harness itself.
+              --strip-volatile  Scrub timestamps, JWT prefixes, UUIDs and PTNs from detail
+                                lines so the output diffs cleanly against the Java client's
+                                `./gradlew runSmokeTest`. Same regex on both sides.
 
-EXIT CODES
-  0   all scenarios passed or skipped
-  1   one or more scenarios failed
-  2   config error before client could start
+            EXIT CODES
+              0   all scenarios passed or skipped
+              1   one or more scenarios failed
+              2   config error before client could start
 
 
-HELP;
+            HELP;
     }
 }
 
-final class SkipScenario extends \RuntimeException
+final class SkipScenario extends RuntimeException
 {
 }

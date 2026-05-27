@@ -28,7 +28,7 @@ final class ConfirmApiTest extends ApiTestCase
         $req = $this->lastApiRequest();
         $this->assertApiRequest($req, 'POST', '/v2/collectstd', '');
         self::assertSame('application/json', $req->getHeaderLine('Content-Type'));
-        $sent = \json_decode((string) $req->getBody(), true);
+        $sent = json_decode((string) $req->getBody(), true);
         self::assertIsArray($sent);
         self::assertSame('0e1f7f4a-3b2c-4a8d-9d1f-1f5d2c3a4b6e', $sent['quoteId']);
         self::assertSame('Jane Doe', $sent['customerName']);

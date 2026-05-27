@@ -40,16 +40,16 @@ final readonly class CollectionRequest
         if ($customerEmailaddress === '') {
             throw new SmobilpayConfigException('CollectionRequest customerEmailaddress must not be empty');
         }
-        if ($tag !== null && \mb_strlen($tag) > 50) {
+        if ($tag !== null && mb_strlen($tag) > 50) {
             throw new SmobilpayConfigException(\sprintf(
                 'CollectionRequest tag exceeds 50-character limit: length=%d',
-                \mb_strlen($tag),
+                mb_strlen($tag),
             ));
         }
-        if ($callbackUrl !== null && \mb_strlen($callbackUrl) > 255) {
+        if ($callbackUrl !== null && mb_strlen($callbackUrl) > 255) {
             throw new SmobilpayConfigException(\sprintf(
                 'CollectionRequest callbackUrl exceeds 255-character limit: length=%d',
-                \mb_strlen($callbackUrl),
+                mb_strlen($callbackUrl),
             ));
         }
     }

@@ -29,8 +29,8 @@ final class OAuth2TokenManagerTest extends TestCase
 
     private function tokenResponse(int $expiresIn = 3600, ?string $body = null): Response
     {
-        $body ??= \json_encode([
-            'access_token' => 'JWT-' . \bin2hex(\random_bytes(8)),
+        $body ??= json_encode([
+            'access_token' => 'JWT-' . bin2hex(random_bytes(8)),
             'token_type' => 'Bearer',
             'expires_in' => $expiresIn,
         ]);
@@ -57,7 +57,7 @@ final class OAuth2TokenManagerTest extends TestCase
         self::assertSame('grant_type=client_credentials', (string) $req->getBody());
         $authHeader = $req->getHeaderLine('Authorization');
         self::assertStringStartsWith('Basic ', $authHeader);
-        $decoded = \base64_decode(\substr($authHeader, 6), true);
+        $decoded = base64_decode(substr($authHeader, 6), true);
         self::assertSame('public-key-abcdef:secret-key-fedcba', $decoded);
     }
 
@@ -135,8 +135,11 @@ final class OAuth2TokenManagerTest extends TestCase
     public function testHttpErrorBubblesAsAuthException(): void
     {
         $http = new MockHttpClient();
-        $http->addResponse(new Response(401, ['Content-Type' => 'application/json'],
-            '{"error":"invalid_client","error_description":"Bad creds."}'));
+        $http->addResponse(new Response(
+            401,
+            ['Content-Type' => 'application/json'],
+            '{"error":"invalid_client","error_description":"Bad creds."}',
+        ));
         $factory = new Psr17Factory();
         $clock = new FakeClock(new DateTimeImmutable('2026-05-02T08:00:00Z'));
 
@@ -153,8 +156,11 @@ final class OAuth2TokenManagerTest extends TestCase
     public function testMissingAccessTokenThrows(): void
     {
         $http = new MockHttpClient();
-        $http->addResponse(new Response(200, ['Content-Type' => 'application/json'],
-            '{"token_type":"Bearer","expires_in":3600}'));
+        $http->addResponse(new Response(
+            200,
+            ['Content-Type' => 'application/json'],
+            '{"token_type":"Bearer","expires_in":3600}',
+        ));
         $factory = new Psr17Factory();
         $clock = new FakeClock(new DateTimeImmutable('2026-05-02T08:00:00Z'));
 
@@ -166,8 +172,11 @@ final class OAuth2TokenManagerTest extends TestCase
     public function testMissingExpiresInThrows(): void
     {
         $http = new MockHttpClient();
-        $http->addResponse(new Response(200, ['Content-Type' => 'application/json'],
-            '{"access_token":"abc","token_type":"Bearer"}'));
+        $http->addResponse(new Response(
+            200,
+            ['Content-Type' => 'application/json'],
+            '{"access_token":"abc","token_type":"Bearer"}',
+        ));
         $factory = new Psr17Factory();
         $clock = new FakeClock(new DateTimeImmutable('2026-05-02T08:00:00Z'));
 
@@ -179,8 +188,11 @@ final class OAuth2TokenManagerTest extends TestCase
     public function testStringExpiresInIsAccepted(): void
     {
         $http = new MockHttpClient();
-        $http->addResponse(new Response(200, ['Content-Type' => 'application/json'],
-            '{"access_token":"abc","token_type":"Bearer","expires_in":"3600"}'));
+        $http->addResponse(new Response(
+            200,
+            ['Content-Type' => 'application/json'],
+            '{"access_token":"abc","token_type":"Bearer","expires_in":"3600"}',
+        ));
         $factory = new Psr17Factory();
         $clock = new FakeClock(new DateTimeImmutable('2026-05-02T08:00:00Z'));
 
