@@ -24,7 +24,8 @@ final class AccountValidationApi
      * selected service. Only meaningful for services that report
      * `isVerifiable: true`.
      *
-     * Returns `true` if the service number is valid.
+     * Per the partner spec the response body is a bare JSON boolean
+     * (`true` or `false`), not a wrapped object.
      */
     public function verifyServiceNumber(string $merchant, int $serviceid, string $serviceNumber): bool
     {
@@ -35,22 +36,15 @@ final class AccountValidationApi
             throw new SmobilpayConfigException('verifyServiceNumber: serviceNumber must not be empty');
         }
 
-        /** @var \stdClass $response */
-        $response = $this->transport->get(
+        $body = $this->transport->getRaw(
             '/v2/verify',
             QueryParams::of()
                 ->add('merchant', $merchant)
                 ->add('serviceid', $serviceid)
                 ->add('serviceNumber', $serviceNumber),
-            \stdClass::class,
         );
-        // Some deployments return `true`/`false` as the raw body; others
-        // return `{"valid": true}`. We accept both via stdClass + cast.
-        if (isset($response->valid) && \is_bool($response->valid)) {
-            return $response->valid;
-        }
 
-        return false;
+        return \trim($body) === 'true';
     }
 
     /**

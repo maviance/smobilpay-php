@@ -66,6 +66,18 @@ final class HttpTransport
     }
 
     /**
+     * Authenticated GET that returns the raw response body. Used by
+     * endpoints whose response shape is a bare JSON primitive
+     * (currently only `GET /v2/verify`, which returns `true`/`false`).
+     */
+    public function getRaw(string $path, QueryParams $query): string
+    {
+        $request = $this->buildAuthedRequest('GET', $path, $query);
+
+        return $this->execute($request);
+    }
+
+    /**
      * Authenticated POST with a JSON body.
      *
      * @template T of object

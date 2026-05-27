@@ -114,7 +114,7 @@ final class OAuth2TokenManager
         $this->current = $minted;
         if ($this->cache !== null) {
             $ttl = $minted->expiresAt->getTimestamp() - $issuedAt->getTimestamp()
-                - $this->config->tokenRefreshSkewSeconds();
+                - $this->config->tokenRefreshSkewSeconds;
             if ($ttl > 0) {
                 try {
                     $this->cache->set($this->cacheKey, [

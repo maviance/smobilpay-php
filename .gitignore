@@ -25,3 +25,4 @@ composer.phar
 # OS
 .DS_Store
 Thumbs.db
+composer.lock

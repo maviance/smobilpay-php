@@ -14,6 +14,7 @@ use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionUnionType;
+use stdClass;
 use Throwable;
 
 /**
@@ -30,6 +31,10 @@ use Throwable;
  *
  * Decoding rules:
  *  - Reads the target class's constructor; maps JSON keys to parameter names.
+ *  - Builds constructor args as an associative array of `name => value` and
+ *    invokes via `ReflectionClass::newInstanceArgs()` which, since PHP 8.0,
+ *    supports named arguments — so missing optional fields simply don't
+ *    appear in the map (no positional drift).
  *  - Coerces primitives, recurses into typed object parameters.
  *  - {@see BackedEnum} → `Enum::from($value)` (must be a valid case).
  *  - {@see DateTimeImmutable} → {@see LenientDateParser::parse()}.
@@ -39,6 +44,8 @@ use Throwable;
  *  - Unknown JSON keys are ignored (forward-compatibility — matches Java's
  *    `FAIL_ON_UNKNOWN_PROPERTIES = false`).
  *  - Missing required parameters throw {@see SmobilpayParseException}.
+ *  - {@see stdClass} target: returns a stdClass with the decoded object's
+ *    keys copied verbatim.
  */
 final class JsonSerializer
 {
@@ -109,6 +116,27 @@ final class JsonSerializer
     }
 
     /**
+     * Decode a body that is a bare JSON primitive (`true`, `false`, `null`,
+     * a number, or a string). Used by endpoints whose response schema is a
+     * primitive — most notably `GET /v2/verify` which returns a bare boolean.
+     */
+    public function decodePrimitive(string $body): mixed
+    {
+        $trimmed = \trim($body);
+        if ($trimmed === '') {
+            throw new SmobilpayParseException('Cannot decode empty response body');
+        }
+        try {
+            return \json_decode($trimmed, true, 16, \JSON_THROW_ON_ERROR);
+        } catch (Throwable $e) {
+            throw new SmobilpayParseException(
+                'Response body is not valid JSON: ' . $e->getMessage(),
+                $e,
+            );
+        }
+    }
+
+    /**
      * Encode a DTO into JSON. Properties whose value is `null` are skipped.
      */
     public function encode(object $value): string
@@ -132,6 +160,15 @@ final class JsonSerializer
      */
     private function hydrate(string $class, array $data): object
     {
+        if ($class === stdClass::class) {
+            $obj = new stdClass();
+            foreach ($data as $k => $v) {
+                $obj->{(string) $k} = $v;
+            }
+            /** @var T $obj */
+            return $obj;
+        }
+
         $ref = new ReflectionClass($class);
         $ctor = $ref->getConstructor();
         if ($ctor === null) {
@@ -141,6 +178,10 @@ final class JsonSerializer
             return $instance;
         }
 
+        // Build an associative map of named arguments so optional missing
+        // fields simply don't appear (PHP 8 newInstanceArgs supports named
+        // args). This avoids positional drift when JSON omits optional
+        // fields before required-by-position-but-actually-optional ones.
         $args = [];
         foreach ($ctor->getParameters() as $param) {
             $name = $param->getName();
@@ -151,7 +192,7 @@ final class JsonSerializer
                     continue;
                 }
                 if ($param->allowsNull()) {
-                    $args[] = null;
+                    $args[$name] = null;
                     continue;
                 }
                 throw new SmobilpayParseException(\sprintf(
@@ -163,7 +204,7 @@ final class JsonSerializer
 
             /** @var mixed $raw */
             $raw = $data[$name];
-            $args[] = $this->coerce($raw, $param, $class);
+            $args[$name] = $this->coerce($raw, $param, $class);
         }
 
         /** @var T $instance */
@@ -191,8 +232,9 @@ final class JsonSerializer
         }
 
         if ($type instanceof ReflectionUnionType) {
-            // We only support union types of shape `Foo|null`, which Reflection
-            // expresses as a UnionType when written as `Foo|null` (vs `?Foo`).
+            // We only support union types of shape `Foo|null`. Reflection
+            // represents `?Foo` as a NamedType (with allowsNull=true) and
+            // `Foo|null` as a UnionType. Pick the first non-null branch.
             foreach ($type->getTypes() as $sub) {
                 if ($sub instanceof ReflectionNamedType && $sub->getName() !== 'null') {
                     return $this->coerceNamed($raw, $sub, $param, $owningClass);
@@ -223,7 +265,7 @@ final class JsonSerializer
         if ($type->isBuiltin()) {
             return match ($name) {
                 'int' => \is_int($raw) ? $raw : (int) $raw,
-                'float' => \is_float($raw) ? $raw : (float) $raw,
+                'float' => \is_float($raw) ? $raw : (float) (\is_int($raw) ? $raw : (string) $raw),
                 'bool' => (bool) $raw,
                 'string' => \is_string($raw) ? $raw : (string) $raw,
                 'array' => $this->coerceArray($raw, $param, $owningClass),
@@ -232,14 +274,21 @@ final class JsonSerializer
             };
         }
 
-        // Class-named types
         if (\is_a($name, BackedEnum::class, true)) {
             /** @var class-string<BackedEnum> $name */
-            $candidate = $name::tryFrom(\is_string($raw) || \is_int($raw) ? $raw : (string) $raw);
+            if (!\is_string($raw) && !\is_int($raw)) {
+                throw new SmobilpayParseException(\sprintf(
+                    'Expected scalar for enum field "%s" of %s, got %s',
+                    $param->getName(),
+                    $owningClass,
+                    \get_debug_type($raw),
+                ));
+            }
+            $candidate = $name::tryFrom($raw);
             if ($candidate === null) {
                 throw new SmobilpayParseException(\sprintf(
                     'Unknown enum value "%s" for %s on field "%s" of %s',
-                    \is_scalar($raw) ? (string) $raw : \get_debug_type($raw),
+                    (string) $raw,
                     $name,
                     $param->getName(),
                     $owningClass,
@@ -293,6 +342,9 @@ final class JsonSerializer
         return $raw;
     }
 
+    /**
+     * @return array<int|string, mixed>
+     */
     private function coerceArray(mixed $raw, ReflectionParameter $param, string $owningClass): array
     {
         if (!\is_array($raw)) {
@@ -304,8 +356,6 @@ final class JsonSerializer
             ));
         }
 
-        // Look for a #[ListOf(ElementClass::class)] attribute to know how to
-        // hydrate each element. Without it, return the raw array unchanged.
         $listOfAttrs = $param->getAttributes(ListOf::class);
         if ($listOfAttrs === []) {
             return $raw;
