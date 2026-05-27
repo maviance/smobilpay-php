@@ -184,5 +184,10 @@ cp smoke-test.example.json smoke-test.json
 composer smoke
 ```
 
-The smoke test is **read-only / quote-only** (never calls
-`/v2/collectstd`), so it is safe to run against production.
+The smoke test is **quote-only by default** (never calls
+`/v2/collectstd`), so it is safe to run against production out of the
+box. Each flow block can opt in to a real `POST /v2/collectstd` plus a
+`/v2/verifytx` poll by adding `"collect": true` together with
+`customerPhonenumber` and `customerEmailaddress` — see the README
+"Smoke test" section. The opt-in moves real money, so leave it off in
+production.

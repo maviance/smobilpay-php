@@ -54,7 +54,13 @@ in-place upgrade path — see [UPGRADING.md](./UPGRADING.md).
   harness that reads the same `smoke-test.json` format as the Java
   client, emits the same `RUN`/`PASS`/`SKIP`/`FAIL` output, and
   supports `--offline` (fixture replay) and `--strip-volatile`
-  (timestamp/UUID/JWT scrubbing for cross-language diff).
+  (timestamp/UUID/JWT scrubbing for cross-language diff). Quote-only
+  by default; every collection-bearing block (cashout, bill, topup,
+  voucher, product, subscription, cashin) can opt in to a full
+  `POST /v2/collectstd` + one-shot `/v2/verifytx` poll by setting
+  `"collect": true` with `customerPhonenumber` + `customerEmailaddress`,
+  matching the Node.js client's `nodejs/samples/smoke-test.js`
+  opt-in mechanic.
 - Comprehensive test suite: unit tests for OAuth lifecycle, JSON
   serializer, date parser, query encoder, model invariants, exception
   payloads; integration tests for every API class using

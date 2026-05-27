@@ -1,6 +1,7 @@
 {
     "_doc": "Smoke-test config. Copy to smoke-test.json (gitignored) and fill in.",
-    "_doc_compat": "Same schema as the Java client at /root/s3p-clients/java/smoke-test.json.",
+    "_doc_compat": "Same schema as the Java and Node.js clients (see /root/s3p-clients/java/smoke-test.json and /root/s3p-clients/nodejs/smoke-test.json).",
+    "_doc_collect": "Every collection-bearing block (cashout, bill, topup, voucher, product, subscription, cashin) can opt in to a real POST /v2/collectstd by adding: \"collect\": true plus \"customerPhonenumber\" and \"customerEmailaddress\" (and optionally customerName, customerAddress, customerNumber, serviceNumber, tag, callbackUrl, cdata, trid). Without \"collect\": true the harness stays quote-only. The cashin block below shows the opt-in shape under leading-underscore keys so it stays dormant in this template; drop the underscores to enable. WARNING: an enabled opt-in MOVES REAL MONEY when run online.",
 
     "baseUrl":    "https://api.example.invalid",
     "publicKey":  "REPLACE_WITH_PARTNER_PUBLIC_KEY",
@@ -15,7 +16,12 @@
     "subscription": { "merchant": "CANALPLUS", "serviceId": 100500,
                       "serviceNumber": "DECODER-001234", "customerNumber": null,
                       "amount": null },
-    "cashin":       { "serviceId": 100600,     "amount": 10000 },
+    "cashin":       { "serviceId": 100600,     "amount": 10000,
+                      "_optin_collect":        "For cashin, customerPhonenumber is the RECIPIENT's MSISDN — money flows INTO that wallet.",
+                      "_collect":              true,
+                      "_customerPhonenumber":  "237699999999",
+                      "_customerEmailaddress": "ops@partner.example",
+                      "_serviceNumber":        "237699999999" },
     "verify":       { "merchant": "ENEO",      "serviceId": 1234,   "serviceNumber": "01234567" },
     "validate":     { "destination": "237699999999", "serviceId": 999999 }
 }

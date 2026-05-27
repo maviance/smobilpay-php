@@ -506,8 +506,25 @@ composer smoke -- --strip-volatile > /tmp/php.log
 diff -u /tmp/java.log /tmp/php.log
 ```
 
-The smoke test is **read-only / quote-only**; it never calls
-`/v2/collectstd`, so it does not move money.
+The smoke test is **quote-only by default** — it never calls
+`/v2/collectstd` and does not move money. Each collection-bearing block
+(`cashout`, `bill`, `topup`, `voucher`, `product`, `subscription`,
+`cashin`) can opt in to a full collection run by adding:
+
+```json
+"collect": true,
+"customerPhonenumber":  "237699999999",
+"customerEmailaddress": "ops@partner.example"
+```
+
+(plus any of the optional pass-through fields `customerName`,
+`customerAddress`, `customerNumber`, `serviceNumber`, `tag`, `callbackUrl`,
+`cdata`, `trid`). When the opt-in is set, the scenario follows the quote
+with a real `POST /v2/collectstd` and a one-shot `/v2/verifytx` poll —
+matching the behaviour of the Node.js (`nodejs/samples/smoke-test.js`)
+and Java (`java/src/samples/.../SmokeTest.java`) smoke harnesses.
+**Enabling `collect: true` moves real money** on the configured
+environment, so leave it off when running against production.
 
 ## Onboarding
 

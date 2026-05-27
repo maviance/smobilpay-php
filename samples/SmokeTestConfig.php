@@ -15,13 +15,30 @@ use Throwable;
  * the corresponding scenario to be skipped. See `smoke-test.example.json`
  * at the repo root for a fully-populated template.
  *
- * @phpstan-type CashoutCfg array{serviceId: int, amount: int}
- * @phpstan-type BillCfg    array{merchant: string, serviceId: int, serviceNumber: string}
- * @phpstan-type TopupCfg   array{serviceId: int, amount: int}
- * @phpstan-type VoucherCfg array{serviceId: int, amount?: int|null}
- * @phpstan-type ProductCfg array{serviceId: int, amount?: int|null}
- * @phpstan-type SubscriptionCfg array{merchant: string, serviceId: int, serviceNumber?: string|null, customerNumber?: string|null, amount?: int|null}
- * @phpstan-type CashinCfg  array{serviceId: int, amount: int}
+ * Every collection-bearing block (cashout, bill, topup, voucher, product,
+ * subscription, cashin) also accepts an opt-in collect tail that promotes
+ * the scenario from quote-only to a real `POST /v2/collectstd`. The opt-in
+ * keys are:
+ *
+ *  - `collect`:              must be literal `true` to enable
+ *  - `customerPhonenumber`:  required; for collections = payer MSISDN,
+ *                            for disbursements (cashin) = recipient MSISDN
+ *  - `customerEmailaddress`: required
+ *  - optional pass-through:  `customerName`, `customerAddress`,
+ *                            `customerNumber`, `serviceNumber`, `tag`,
+ *                            `callbackUrl`, `cdata`, `trid`
+ *
+ * Identical schema (and identical opt-in semantics) to the Node.js client
+ * at `nodejs/samples/smoke-test.js`.
+ *
+ * @phpstan-type CollectOptIn array{collect?: bool, customerPhonenumber?: string|null, customerEmailaddress?: string|null, customerName?: string|null, customerAddress?: string|null, customerNumber?: string|null, serviceNumber?: string|null, tag?: string|null, callbackUrl?: string|null, cdata?: string|null, trid?: string|null}
+ * @phpstan-type CashoutCfg array{serviceId: int, amount: int}&CollectOptIn
+ * @phpstan-type BillCfg    array{merchant: string, serviceId: int, serviceNumber: string}&CollectOptIn
+ * @phpstan-type TopupCfg   array{serviceId: int, amount: int}&CollectOptIn
+ * @phpstan-type VoucherCfg array{serviceId: int, amount?: int|null}&CollectOptIn
+ * @phpstan-type ProductCfg array{serviceId: int, amount?: int|null}&CollectOptIn
+ * @phpstan-type SubscriptionCfg array{merchant: string, serviceId: int, serviceNumber?: string|null, customerNumber?: string|null, amount?: int|null}&CollectOptIn
+ * @phpstan-type CashinCfg  array{serviceId: int, amount: int}&CollectOptIn
  * @phpstan-type VerifyCfg  array{merchant: string, serviceId: int, serviceNumber: string}
  * @phpstan-type ValidateCfg array{destination: string, serviceId: int}
  */

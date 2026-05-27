@@ -9,8 +9,10 @@ use DateTimeZone;
 use Http\Mock\Client as MockHttpClient;
 use Maviance\Smobilpay\Exception\SmobilpayApiException;
 use Maviance\Smobilpay\Exception\SmobilpayAuthException;
+use Maviance\Smobilpay\Model\CollectionRequest;
 use Maviance\Smobilpay\Model\PaymentItem;
 use Maviance\Smobilpay\Model\QuoteRequest;
+use Maviance\Smobilpay\Model\QuoteResponse;
 use Maviance\Smobilpay\Model\ServiceType;
 use Maviance\Smobilpay\SmobilpayClient;
 use Maviance\Smobilpay\SmobilpayConfig;
@@ -24,9 +26,14 @@ use Throwable;
  * Smoke-test harness for the Smobilpay client against a real partner
  * environment.
  *
- * Read-only / quote-only — never calls `/v2/collectstd`, so it does not
- * move money. Output format mirrors the Java client's `runSmokeTest`
- * line-for-line so the two runs can be diffed.
+ * Quote-only by default — never calls `/v2/collectstd` unless a flow's
+ * config block opts in. When a flow block sets `"collect": true` plus
+ * `customerPhonenumber` + `customerEmailaddress`, the scenario follows the
+ * quote with a real `POST /v2/collectstd` (which *moves money* on the
+ * configured environment) and then polls `/v2/verifytx` once. Omit
+ * `collect` (or set it to `false`) to stay quote-only. Output format
+ * mirrors the Java and Node.js clients line-for-line so the runs can be
+ * diffed.
  *
  * Path resolution: arg[0] → `SMOBILPAY_SMOKE_CONFIG` env → `./smoke-test.json`
  * in CWD (identical to Java).
@@ -34,6 +41,8 @@ use Throwable;
  * Flags:
  *  - `--offline`         Use fixture responses instead of real HTTP (zero
  *                        network). Useful as a self-documenting demo.
+ *                        Opt-in collects are replayed against
+ *                        `collect-response.json` + `verifytx.json`.
  *  - `--strip-volatile`  Scrub timestamp / JWT-prefix / UUID / PTN lines
  *                        from the output so the result diffs cleanly
  *                        against Java's run.
@@ -98,7 +107,7 @@ final class SmokeTest
         $config = $this->buildSmobilpayConfig();
         $client = SmobilpayClient::create($config, $http, $factory, $factory);
 
-        $banner = \sprintf(
+        $banner = sprintf(
             'Smobilpay smoke test  —  baseUrl=%s, apiVersion=%s, publicKey=%s%s',
             $this->redactBaseUrl($config->baseUrl),
             $config->apiVersion,
@@ -205,7 +214,7 @@ final class SmokeTest
             if ($verifiable !== []) {
                 $this->detail("verifiable services (isVerifiable=true) — candidates for the 'verify' block:");
                 foreach ($verifiable as $s) {
-                    $this->detail(\sprintf(
+                    $this->detail(sprintf(
                         '  - serviceId=%d merchant=%s title=%s',
                         $s->serviceid,
                         $s->merchant,
@@ -227,7 +236,7 @@ final class SmokeTest
         }
         $this->detail($label . ':');
         foreach ($matches as $s) {
-            $this->detail(\sprintf(
+            $this->detail(sprintf(
                 '  - serviceId=%d merchant=%s title=%s',
                 $s->serviceid,
                 $s->merchant,
@@ -248,7 +257,7 @@ final class SmokeTest
                 throw new RuntimeException('no cashout items for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(\sprintf(
+            $this->detail(sprintf(
                 'picked: %s (%s, %s, local=%s %s)',
                 $item->payItemId,
                 $item->name ?? '',
@@ -256,7 +265,7 @@ final class SmokeTest
                 $item->amountLocalCur ?? 'null',
                 $item->localCur,
             ));
-            $this->quoteAndReport($client, $item, $c['amount']);
+            $this->quoteAndReport($client, $item, $c['amount'], $c);
         });
     }
 
@@ -269,7 +278,7 @@ final class SmokeTest
             }
             $bills = $client->initiate()->bills($c['merchant'], $c['serviceId'], $c['serviceNumber']);
             if ($bills === []) {
-                throw new RuntimeException(\sprintf(
+                throw new RuntimeException(sprintf(
                     'no bills for %s/%d/%s',
                     $c['merchant'],
                     $c['serviceId'],
@@ -277,7 +286,7 @@ final class SmokeTest
                 ));
             }
             $bill = $bills[0];
-            $this->detail(\sprintf(
+            $this->detail(sprintf(
                 'picked: %s (%s, amount=%s %s, due=%s)',
                 $bill->payItemId,
                 $bill->billType?->value ?? 'null',
@@ -286,7 +295,7 @@ final class SmokeTest
                 $bill->billDueDate?->format('Y-m-d') ?? 'null',
             ));
             $amount = (int) ($bill->amountLocalCur ?? 0);
-            $this->quoteAndReport($client, $bill, $amount);
+            $this->quoteAndReport($client, $bill, $amount, $c);
         });
     }
 
@@ -302,7 +311,7 @@ final class SmokeTest
                 throw new RuntimeException('no topup items for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(\sprintf(
+            $this->detail(sprintf(
                 'picked: %s (%s, %s, local=%s %s)',
                 $item->payItemId,
                 $item->name ?? '',
@@ -310,7 +319,7 @@ final class SmokeTest
                 $item->amountLocalCur ?? 'null',
                 $item->localCur,
             ));
-            $this->quoteAndReport($client, $item, $c['amount']);
+            $this->quoteAndReport($client, $item, $c['amount'], $c);
         });
     }
 
@@ -334,7 +343,7 @@ final class SmokeTest
                 throw new RuntimeException('no vouchers for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(\sprintf(
+            $this->detail(sprintf(
                 'picked: %s (%s, %s, local=%s %s)',
                 $item->payItemId,
                 $item->name ?? '',
@@ -342,7 +351,7 @@ final class SmokeTest
                 $item->amountLocalCur ?? 'null',
                 $item->localCur,
             ));
-            $this->quoteAndReport($client, $item, $this->resolveAmount($item, $c['amount'] ?? null));
+            $this->quoteAndReport($client, $item, $this->resolveAmount($item, $c['amount'] ?? null), $c);
         });
     }
 
@@ -358,7 +367,7 @@ final class SmokeTest
                 throw new RuntimeException('no products for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(\sprintf(
+            $this->detail(sprintf(
                 'picked: %s (%s, %s, local=%s %s)',
                 $item->payItemId,
                 $item->name ?? '',
@@ -366,7 +375,7 @@ final class SmokeTest
                 $item->amountLocalCur ?? 'null',
                 $item->localCur,
             ));
-            $this->quoteAndReport($client, $item, $this->resolveAmount($item, $c['amount'] ?? null));
+            $this->quoteAndReport($client, $item, $this->resolveAmount($item, $c['amount'] ?? null), $c);
         });
     }
 
@@ -390,7 +399,7 @@ final class SmokeTest
                 throw new RuntimeException('no subscriptions for ' . $c['merchant'] . '/' . $c['serviceId']);
             }
             $sub = $subs[0];
-            $this->detail(\sprintf(
+            $this->detail(sprintf(
                 'picked: %s (%s, customer=%s, amount=%s %s, due=%s)',
                 $sub->payItemId,
                 $sub->name ?? '',
@@ -399,7 +408,7 @@ final class SmokeTest
                 $sub->localCur,
                 $sub->dueDate?->format('Y-m-d') ?? 'null',
             ));
-            $this->quoteAndReport($client, $sub, $this->resolveAmount($sub, $c['amount'] ?? null));
+            $this->quoteAndReport($client, $sub, $this->resolveAmount($sub, $c['amount'] ?? null), $c);
         });
     }
 
@@ -415,7 +424,7 @@ final class SmokeTest
                 throw new RuntimeException('no cashin items for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(\sprintf(
+            $this->detail(sprintf(
                 'picked: %s (%s, %s, local=%s %s)',
                 $item->payItemId,
                 $item->name ?? '',
@@ -423,7 +432,7 @@ final class SmokeTest
                 $item->amountLocalCur ?? 'null',
                 $item->localCur,
             ));
-            $this->quoteAndReport($client, $item, $c['amount']);
+            $this->quoteAndReport($client, $item, $c['amount'], $c);
         });
     }
 
@@ -440,7 +449,7 @@ final class SmokeTest
                     $c['serviceId'],
                     $c['serviceNumber'],
                 );
-                $this->detail(\sprintf(
+                $this->detail(sprintf(
                     '%s for %s/%d -> %s',
                     $c['serviceNumber'],
                     $c['merchant'],
@@ -487,10 +496,10 @@ final class SmokeTest
             $rows = $client->verify()->historyByDateRange($weekAgo, $today);
             $this->detail("range:        {$weekAgo->format('Y-m-d')} -> {$today->format('Y-m-d')}");
             $this->detail('transactions: ' . \count($rows));
-            $sample = min(3, \count($rows));
+            $sample = min(30, \count($rows));
             for ($i = 0; $i < $sample; $i++) {
                 $s = $rows[$i];
-                $this->detail(\sprintf(
+                $this->detail(sprintf(
                     '  - %s : %s, %s %s, trid=%s',
                     $s->ptn,
                     $s->status->value,
@@ -504,8 +513,21 @@ final class SmokeTest
 
     // --- Helpers ---------------------------------------------------------
 
-    private function quoteAndReport(SmobilpayClient $client, PaymentItem $item, int $amount): void
-    {
+    /**
+     * Quote the picked PaymentItem and report the price. When the per-flow
+     * config block opts in (`$cfg['collect'] === true`), follow the quote
+     * with a real `POST /v2/collectstd` plus a one-shot `/v2/verifytx` poll.
+     *
+     * @param array<string, mixed>|null $cfg per-flow config block; opt-in
+     *                                       collect is gated on
+     *                                       `$cfg['collect'] === true`
+     */
+    private function quoteAndReport(
+        SmobilpayClient $client,
+        PaymentItem $item,
+        int $amount,
+        ?array $cfg = null,
+    ): void {
         if ($amount < 1) {
             throw new RuntimeException(
                 'cannot quote with amount=' . $amount . ' — set "amount" in this block of smoke-test.json',
@@ -519,7 +541,123 @@ final class SmokeTest
         $this->detail("price (local):  {$quote->priceLocalCur} {$quote->localCur}");
         $this->detail("price (system): {$quote->priceSystemCur} {$quote->systemCur}");
         $this->detail('promotion:      ' . ($quote->promotion ?? '<null>'));
-        $this->detail('(intentionally NOT calling /v2/collectstd)');
+
+        if ($cfg !== null && ($cfg['collect'] ?? false) === true) {
+            $this->collectAndReport($client, $quote, $cfg);
+
+            return;
+        }
+        $this->detail('(intentionally NOT calling /v2/collectstd — set "collect": true on this block to enable)');
+    }
+
+    /**
+     * Execute a real `POST /v2/collectstd` against the unexpired quote, then
+     * poll `/v2/verifytx` once so the smoke run surfaces the latest status.
+     * All identifying fields come straight from the per-flow config block —
+     * the harness never invents customer data.
+     *
+     * For *collection* flows (cashout/bill/topup/voucher/product/subscription)
+     * `customerPhonenumber` is the PAYER's MSISDN. For *disbursement* flows
+     * (cashin) it is the RECIPIENT's MSISDN — money flows INTO that wallet.
+     *
+     * WARNING: this moves real money on the partner balance. Acceptance
+     * transactions are not reversible from the client; if you collect by
+     * mistake, contact your Maviance integration manager.
+     *
+     * @param array<string, mixed> $cfg per-flow config block; must contain
+     *                                  `customerPhonenumber` and
+     *                                  `customerEmailaddress`
+     */
+    private function collectAndReport(
+        SmobilpayClient $client,
+        QuoteResponse $quote,
+        array $cfg,
+    ): void {
+        $phone = $cfg['customerPhonenumber'] ?? null;
+        $email = $cfg['customerEmailaddress'] ?? null;
+        if (!\is_string($phone) || $phone === '') {
+            throw new RuntimeException(
+                "'collect: true' requires 'customerPhonenumber' on the same block",
+            );
+        }
+        if (!\is_string($email) || $email === '') {
+            throw new RuntimeException(
+                "'collect: true' requires 'customerEmailaddress' on the same block",
+            );
+        }
+        $trid = \is_string($cfg['trid'] ?? null) && $cfg['trid'] !== ''
+            ? $cfg['trid']
+            : $this->generateTrid();
+        /** @var array<string, string|null> $optional */
+        $optional = [];
+        foreach (
+            ['customerName', 'customerAddress', 'customerNumber',
+                'serviceNumber', 'tag', 'callbackUrl', 'cdata',
+            ] as $field
+        ) {
+            $v = $cfg[$field] ?? null;
+            $optional[$field] = \is_string($v) && $v !== '' ? $v : null;
+        }
+        $request = new CollectionRequest(
+            quoteId: $quote->quoteId,
+            customerPhonenumber: $phone,
+            customerEmailaddress: $email,
+            customerName: $optional['customerName'],
+            customerAddress: $optional['customerAddress'],
+            customerNumber: $optional['customerNumber'],
+            serviceNumber: $optional['serviceNumber'],
+            trid: $trid,
+            tag: $optional['tag'],
+            callbackUrl: $optional['callbackUrl'],
+            cdata: $optional['cdata'],
+        );
+
+        $this->detail('-> POST /v2/collectstd');
+        $this->detail('   trid:            ' . $trid);
+        if ($optional['serviceNumber'] !== null) {
+            $this->detail('   serviceNumber:   ' . $optional['serviceNumber']);
+        }
+
+        $response = $client->confirm()->collect($request);
+        $this->detail('ptn:             ' . $response->ptn);
+        $this->detail('status:          ' . $response->status->value);
+        $this->detail('receiptNumber:   ' . ($response->receiptNumber ?? '<null>'));
+        if ($response->veriCode !== null) {
+            $this->detail('veriCode:        ' . $response->veriCode);
+        }
+        $this->detail('agentBalance:    ' . ($response->agentBalance ?? 'null'));
+        $this->detail("price (local):   {$response->priceLocalCur} {$response->localCur}");
+        $this->detail("price (system):  {$response->priceSystemCur} {$response->systemCur}");
+        $this->detail('timestamp:       ' . $response->timestamp->format(DATE_ATOM));
+        if ($response->pin !== null) {
+            $this->detail('pin:             ' . $response->pin);
+        }
+
+        if (!$this->offline) {
+            // Give the server a moment to settle before re-checking.
+            sleep(2);
+        }
+        $verifications = $client->verify()->verifyTransaction(ptn: $response->ptn);
+        if ($verifications === []) {
+            $this->detail('verifytx:        no rows yet (final status will land via callbackUrl or a later poll)');
+
+            return;
+        }
+        $v = $verifications[0];
+        $this->detail(sprintf(
+            'verifytx:        status=%s clearingDate=%s',
+            $v->status->value,
+            $v->clearingDate?->format('Y-m-d') ?? 'null',
+        ));
+    }
+
+    private function generateTrid(): string
+    {
+        return sprintf(
+            'php-smoke-%d-%s',
+            (int) (microtime(true) * 1000),
+            bin2hex(random_bytes(3)),
+        );
     }
 
     private function resolveAmount(PaymentItem $item, ?int $configAmount): int
@@ -533,7 +671,7 @@ final class SmokeTest
         if ($local !== null && $local >= 1.0) {
             return (int) $local;
         }
-        throw new RuntimeException(\sprintf(
+        throw new RuntimeException(sprintf(
             'item %s has no fixed catalog amount. Set "amount" in this block of smoke-test.json.',
             $item->payItemId ?? '?',
         ));
@@ -595,7 +733,7 @@ final class SmokeTest
     private function printSummary(): void
     {
         echo self::SEP . PHP_EOL;
-        echo \sprintf('Summary: %d passed, %d skipped, %d failed', $this->passed, $this->skipped, $this->failed) . PHP_EOL;
+        echo sprintf('Summary: %d passed, %d skipped, %d failed', $this->passed, $this->skipped, $this->failed) . PHP_EOL;
         echo self::SEP . PHP_EOL;
     }
 
@@ -697,7 +835,9 @@ final class SmokeTest
     /**
      * Queue every fixture response in the order the 15 scenarios will fetch
      * them. The first response is the OAuth token mint; then ping, then ping
-     * after refresh, then account, etc.
+     * after refresh, then account, etc. Per-flow opt-in collect blocks
+     * (`collect: true` in the config) trigger two additional fixtures
+     * (collect-response + verifytx) for that flow.
      */
     private function preloadOfflineFixtures(MockHttpClient $mock): void
     {
@@ -708,6 +848,13 @@ final class SmokeTest
             \assert($body !== false, "missing fixture: {$name}");
 
             return new Response(200, ['Content-Type' => 'application/json'], $body);
+        };
+        $queueQuoteThenMaybeCollect = function (?array $cfg) use ($mock, $load): void {
+            $mock->addResponse($load('quote-response.json'));
+            if ($cfg !== null && ($cfg['collect'] ?? false) === true) {
+                $mock->addResponse($load('collect-response.json'));
+                $mock->addResponse($load('verifytx.json'));
+            }
         };
 
         // OAuth mint (covers all subsequent authenticated calls within TTL).
@@ -723,27 +870,27 @@ final class SmokeTest
         $mock->addResponse($load('merchants.json'));
         // 5. Services
         $mock->addResponse($load('services.json'));
-        // 6. Cashout discover + quote
+        // 6. Cashout discover + quote (+ collect/verifytx if opted in)
         $mock->addResponse($load('cashout.json'));
-        $mock->addResponse($load('quote-response.json'));
-        // 7. Bill discover + quote
+        $queueQuoteThenMaybeCollect($this->cfg->cashout);
+        // 7. Bill discover + quote (+ collect/verifytx if opted in)
         $mock->addResponse($load('bill.json'));
-        $mock->addResponse($load('quote-response.json'));
-        // 8. Topup discover + quote
+        $queueQuoteThenMaybeCollect($this->cfg->bill);
+        // 8. Topup discover + quote (+ collect/verifytx if opted in)
         $mock->addResponse($load('topup.json'));
-        $mock->addResponse($load('quote-response.json'));
-        // 9. Voucher discover + quote
+        $queueQuoteThenMaybeCollect($this->cfg->topup);
+        // 9. Voucher discover + quote (+ collect/verifytx if opted in)
         $mock->addResponse($load('voucher.json'));
-        $mock->addResponse($load('quote-response.json'));
-        // 10. Product discover + quote
+        $queueQuoteThenMaybeCollect($this->cfg->voucher);
+        // 10. Product discover + quote (+ collect/verifytx if opted in)
         $mock->addResponse($load('product.json'));
-        $mock->addResponse($load('quote-response.json'));
-        // 11. Subscription discover + quote
+        $queueQuoteThenMaybeCollect($this->cfg->product);
+        // 11. Subscription discover + quote (+ collect/verifytx if opted in)
         $mock->addResponse($load('subscription.json'));
-        $mock->addResponse($load('quote-response.json'));
-        // 12. Cashin discover + quote
+        $queueQuoteThenMaybeCollect($this->cfg->subscription);
+        // 12. Cashin discover + quote (+ collect/verifytx if opted in)
         $mock->addResponse($load('cashin.json'));
-        $mock->addResponse($load('quote-response.json'));
+        $queueQuoteThenMaybeCollect($this->cfg->cashin);
         // 13. verifyServiceNumber
         $mock->addResponse($load('verify-true.json'));
         // 14. validateAccount
