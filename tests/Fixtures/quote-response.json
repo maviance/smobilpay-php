@@ -1,0 +1,11 @@
+{
+    "quoteId": "0e1f7f4a-3b2c-4a8d-9d1f-1f5d2c3a4b6e",
+    "expiresAt": "2026-05-02T08:35:00+00:00",
+    "payItemId": "PI-ENEO-PREPAID-001",
+    "amountLocalCur": 5000.0,
+    "priceLocalCur": 5050.0,
+    "priceSystemCur": 8.31,
+    "localCur": "XAF",
+    "systemCur": "EUR",
+    "promotion": null
+}

@@ -1,0 +1,23 @@
+[
+    {
+        "ptn": "PTN-202605020800001",
+        "serviceid": "999999",
+        "merchant": "ENEO",
+        "timestamp": "2026-05-02T08:34:12+00:00",
+        "receiptNumber": "RCPT-0001-001234",
+        "veriCode": "X9F2",
+        "clearingDate": "2026-05-02",
+        "trid": "ORDER-2026-05-02-0001",
+        "priceLocalCur": 5050.0,
+        "priceSystemCur": 8.31,
+        "localCur": "XAF",
+        "systemCur": "EUR",
+        "pin": null,
+        "status": "SUCCESS",
+        "payItemId": "PI-ENEO-PREPAID-001",
+        "payItemDescr": "Eneo prepaid token",
+        "errorCode": 0,
+        "tag": "retail-front-desk",
+        "commission": {"earnings": 25.25, "currency": "XAF"}
+    }
+]

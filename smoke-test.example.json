@@ -1,0 +1,21 @@
+{
+    "_doc": "Smoke-test config. Copy to smoke-test.json (gitignored) and fill in.",
+    "_doc_compat": "Same schema as the Java client at /root/s3p-clients/java/smoke-test.json.",
+
+    "baseUrl":    "https://api.example.invalid",
+    "publicKey":  "REPLACE_WITH_PARTNER_PUBLIC_KEY",
+    "secretKey":  "REPLACE_WITH_PARTNER_SECRET_KEY",
+    "apiVersion": "3.0.0",
+
+    "cashout":      { "serviceId": 999999, "amount": 500 },
+    "bill":         { "merchant": "CDE",       "serviceId": 4321,   "serviceNumber": "METER-001" },
+    "topup":        { "serviceId": 100200,     "amount": 500 },
+    "voucher":      { "serviceId": 100300,     "amount": null },
+    "product":      { "serviceId": 100400,     "amount": null },
+    "subscription": { "merchant": "CANALPLUS", "serviceId": 100500,
+                      "serviceNumber": "DECODER-001234", "customerNumber": null,
+                      "amount": null },
+    "cashin":       { "serviceId": 100600,     "amount": 10000 },
+    "verify":       { "merchant": "ENEO",      "serviceId": 1234,   "serviceNumber": "01234567" },
+    "validate":     { "destination": "237699999999", "serviceId": 999999 }
+}

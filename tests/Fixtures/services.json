@@ -1,0 +1,68 @@
+[
+    {
+        "serviceid": 999999,
+        "merchant": "ENEO",
+        "title": "Eneo Prepaid Token",
+        "description": "Generic prepaid electricity collection",
+        "category": "Utilities",
+        "country": "CMR",
+        "localCur": "XAF",
+        "type": "CASHOUT",
+        "status": "Active",
+        "isReqCustomerName": false,
+        "isReqCustomerAddress": false,
+        "isReqCustomerNumber": false,
+        "isReqServiceNumber": true,
+        "isVerifiable": true,
+        "labelServiceNumber": [
+            {"language": "en", "localText": "Meter number"},
+            {"language": "fr", "localText": "Numero du compteur"}
+        ]
+    },
+    {
+        "serviceid": 4321,
+        "merchant": "CDE",
+        "title": "Camwater Bill Payment",
+        "description": "Pay your monthly water bill",
+        "category": "Utilities",
+        "country": "CMR",
+        "localCur": "XAF",
+        "type": "SEARCHABLE_BILL",
+        "status": "Active",
+        "isReqCustomerName": true,
+        "isReqServiceNumber": true,
+        "isVerifiable": false
+    },
+    {
+        "serviceid": 100500,
+        "merchant": "CANALPLUS",
+        "title": "Canal+ Subscription Renewal",
+        "description": "Renew your Canal+ subscription",
+        "category": "Entertainment",
+        "country": "CMR",
+        "localCur": "XAF",
+        "type": "SUBSCRIPTION",
+        "status": "Active",
+        "isReqCustomerName": true,
+        "isReqServiceNumber": true
+    },
+    {
+        "serviceid": 100200,
+        "merchant": "MTN",
+        "title": "MTN Airtime",
+        "country": "CMR",
+        "localCur": "XAF",
+        "type": "TOPUP",
+        "status": "Active",
+        "isReqServiceNumber": true
+    },
+    {
+        "serviceid": 100300,
+        "merchant": "GIFTCARDS",
+        "title": "Gift Card Voucher",
+        "country": "CMR",
+        "localCur": "XAF",
+        "type": "VOUCHER",
+        "status": "Active"
+    }
+]

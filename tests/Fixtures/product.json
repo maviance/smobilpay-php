@@ -1,0 +1,15 @@
+[
+    {
+        "serviceid": 100400,
+        "merchant": "EXAMPLE",
+        "payItemId": "PI-EXAMPLE-PROD-001",
+        "payItemDescr": "Example product item",
+        "amountType": "FIXED",
+        "localCur": "XAF",
+        "name": "Example product",
+        "amountLocalCur": 2500.0,
+        "description": "A demonstration product item",
+        "optStrg": null,
+        "optNmb": null
+    }
+]

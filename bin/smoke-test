@@ -1,0 +1,25 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+// Locate autoload — works whether installed as a dependency (vendor/bin/smoke-test)
+// or run from the project root (bin/smoke-test).
+$autoloadPaths = [
+    __DIR__ . '/../vendor/autoload.php',                // run from project root
+    __DIR__ . '/../../../autoload.php',                  // installed in vendor/bin
+    __DIR__ . '/../../autoload.php',                     // alternate vendor layout
+];
+foreach ($autoloadPaths as $candidate) {
+    if (\file_exists($candidate)) {
+        require $candidate;
+        break;
+    }
+}
+
+if (!\class_exists(\Maviance\Smobilpay\Samples\SmokeTest::class)) {
+    \fwrite(STDERR, "Composer autoload not found. Run `composer install` first.\n");
+    exit(2);
+}
+
+exit(\Maviance\Smobilpay\Samples\SmokeTest::main($argv));

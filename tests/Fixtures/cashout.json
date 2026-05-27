@@ -1,0 +1,15 @@
+[
+    {
+        "serviceid": 999999,
+        "merchant": "ENEO",
+        "payItemId": "PI-ENEO-PREPAID-001",
+        "payItemDescr": "Eneo prepaid token",
+        "amountType": "CUSTOM",
+        "localCur": "XAF",
+        "name": "Eneo prepaid",
+        "amountLocalCur": null,
+        "description": "Customer-defined amount, min 500 XAF",
+        "optStrg": null,
+        "optNmb": 500.0
+    }
+]

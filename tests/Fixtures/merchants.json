@@ -1,0 +1,25 @@
+[
+    {
+        "merchant": "ENEO",
+        "name": "Eneo Cameroon",
+        "description": "National electricity utility",
+        "country": "CMR",
+        "status": "Active",
+        "logo": "https://cdn.example.invalid/logo/eneo.png",
+        "logoHash": "9c8b73a0f4d6e5f1"
+    },
+    {
+        "merchant": "CDE",
+        "name": "Camwater",
+        "description": "National water utility",
+        "country": "CMR",
+        "status": "Active"
+    },
+    {
+        "merchant": "CANALPLUS",
+        "name": "Canal+ Cameroun",
+        "description": "Pay-TV subscriptions",
+        "country": "CMR",
+        "status": "Active"
+    }
+]

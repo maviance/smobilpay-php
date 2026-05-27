@@ -1,0 +1,15 @@
+[
+    {
+        "serviceid": 100300,
+        "merchant": "GIFTCARDS",
+        "payItemId": "PI-GIFTCARD-1000",
+        "payItemDescr": "1000 XAF gift card",
+        "amountType": "FIXED",
+        "localCur": "XAF",
+        "name": "Gift card 1000",
+        "amountLocalCur": 1000.0,
+        "description": "Digital gift card; PIN delivered on collection.",
+        "optStrg": null,
+        "optNmb": null
+    }
+]

@@ -1,0 +1,14 @@
+{
+    "balance": 1245.32,
+    "currency": "EUR",
+    "key": "ABCDEF1234567890",
+    "agentId": "AGT-0001",
+    "agentName": "Jane Operator",
+    "agentAddress": "12 Avenue de l'Independance, Yaounde",
+    "agentPhonenumber": "237699111222",
+    "companyName": "Example Retail SARL",
+    "companyAddress": "BP 100, Yaounde",
+    "companyPhonenumber": "237699333444",
+    "limitMax": 5000.00,
+    "limitRemaining": 4250.00
+}

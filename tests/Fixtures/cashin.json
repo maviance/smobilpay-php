@@ -1,0 +1,15 @@
+[
+    {
+        "serviceid": 100600,
+        "merchant": "MTNMOMO",
+        "payItemId": "PI-MTNMOMO-DISBURSE-001",
+        "payItemDescr": "MTN MoMo disbursement",
+        "amountType": "CUSTOM",
+        "localCur": "XAF",
+        "name": "MTN MoMo payout",
+        "amountLocalCur": null,
+        "description": "Disbursement to MTN MoMo wallet",
+        "optStrg": null,
+        "optNmb": null
+    }
+]

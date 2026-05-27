@@ -1,0 +1,25 @@
+[
+    {
+        "serviceid": 4321,
+        "merchant": "CDE",
+        "payItemId": "PI-CDE-BILL-2026-04",
+        "payItemDescr": "Camwater bill April 2026",
+        "amountType": "FIXED",
+        "localCur": "XAF",
+        "name": "Camwater April 2026",
+        "amountLocalCur": 13450.0,
+        "description": "Water consumption for April 2026",
+        "optStrg": null,
+        "optNmb": null,
+        "billType": "REGULAR",
+        "penaltyAmount": 0.0,
+        "payOrder": 1,
+        "serviceNumber": "METER-001",
+        "billNumber": "BILL-2026-04-001",
+        "customerNumber": "CUST-001",
+        "billMonth": "04",
+        "billYear": "2026",
+        "billDate": "2026-04-01",
+        "billDueDate": "2026-04-30T23:59:59+01:00"
+    }
+]

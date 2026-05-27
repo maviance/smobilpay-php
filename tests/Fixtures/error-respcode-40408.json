@@ -1,0 +1,6 @@
+{
+    "respCode": 40408,
+    "devMsg": "Service does not support pre-payment verification.",
+    "usrMsg": "Verification not available for this service.",
+    "link": null
+}

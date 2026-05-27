@@ -1,0 +1,6 @@
+{
+    "respCode": 40101,
+    "devMsg": "GET /v2/validate is restricted; partner is not enabled for this endpoint.",
+    "usrMsg": "Account validation is not available for this account.",
+    "link": null
+}

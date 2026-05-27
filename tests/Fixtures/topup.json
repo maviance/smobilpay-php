@@ -1,0 +1,28 @@
+[
+    {
+        "serviceid": 100200,
+        "merchant": "MTN",
+        "payItemId": "PI-MTN-TOPUP-CUSTOM",
+        "payItemDescr": "MTN airtime top-up (custom)",
+        "amountType": "CUSTOM",
+        "localCur": "XAF",
+        "name": "MTN airtime",
+        "amountLocalCur": null,
+        "description": null,
+        "optStrg": null,
+        "optNmb": null
+    },
+    {
+        "serviceid": 100200,
+        "merchant": "MTN",
+        "payItemId": "PI-MTN-TOPUP-1000",
+        "payItemDescr": "MTN airtime 1000 XAF",
+        "amountType": "FIXED",
+        "localCur": "XAF",
+        "name": "MTN airtime 1000",
+        "amountLocalCur": 1000.0,
+        "description": null,
+        "optStrg": null,
+        "optNmb": null
+    }
+]

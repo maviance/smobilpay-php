@@ -1,0 +1,5 @@
+{
+    "access_token": "eyJraWQiOiJrLTAxIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJBQkNERUYxMjM0NTY3ODkwIiwiaXNzIjoic21vYmlscGF5IiwiZXhwIjo5OTk5OTk5OTk5fQ.signature-bytes",
+    "token_type": "Bearer",
+    "expires_in": 3600
+}

@@ -1,0 +1,22 @@
+[
+    {
+        "serviceid": 100500,
+        "merchant": "CANALPLUS",
+        "payItemId": "PI-CANALPLUS-EVASION-1M",
+        "payItemDescr": "Canal+ Evasion - 1 month",
+        "amountType": "FIXED",
+        "localCur": "XAF",
+        "name": "Canal+ Evasion 1 month",
+        "amountLocalCur": 9000.0,
+        "description": "1-month renewal for Canal+ Evasion package",
+        "optStrg": null,
+        "optNmb": null,
+        "serviceNumber": "DECODER-001234",
+        "customerReference": "CUSTREF-001234",
+        "customerName": "Jane Subscriber",
+        "customerNumber": "CUST-001234",
+        "startDate": "2026-04-15",
+        "dueDate": "2026-05-15",
+        "endDate": "2026-05-15"
+    }
+]

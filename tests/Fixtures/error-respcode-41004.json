@@ -1,0 +1,6 @@
+{
+    "respCode": 41004,
+    "devMsg": "Voucher catalog does not include serviceId=100300 even though the service is labelled VOUCHER.",
+    "usrMsg": "This voucher is currently unavailable.",
+    "link": null
+}

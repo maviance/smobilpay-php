@@ -1,0 +1,17 @@
+{
+    "ptn": "PTN-202605020800001",
+    "timestamp": "2026-05-02T08:34:12+00:00",
+    "agentBalance": 1245.32,
+    "receiptNumber": "RCPT-0001-001234",
+    "veriCode": "X9F2",
+    "priceLocalCur": 5050.0,
+    "priceSystemCur": 8.31,
+    "localCur": "XAF",
+    "systemCur": "EUR",
+    "trid": "ORDER-2026-05-02-0001",
+    "pin": null,
+    "status": "PENDING",
+    "payItemId": "PI-ENEO-PREPAID-001",
+    "payItemDescr": "Eneo prepaid token",
+    "tag": "retail-front-desk"
+}
