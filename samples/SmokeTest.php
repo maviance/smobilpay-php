@@ -31,9 +31,12 @@ use Throwable;
  * `customerPhonenumber` + `customerEmailaddress`, the scenario follows the
  * quote with a real `POST /v2/collectstd` (which *moves money* on the
  * configured environment) and then polls `/v2/verifytx` once. Omit
- * `collect` (or set it to `false`) to stay quote-only. Output format
- * mirrors the Java and Node.js clients line-for-line so the runs can be
- * diffed.
+ * `collect` (or set it to `false`) to stay quote-only.
+ *
+ * Each scenario prints a one-line headline summary mirroring the Java
+ * and Node.js clients, plus a full `(all fields)` dump of every parsed
+ * DTO property so the run doubles as proof that every wire field
+ * decoded into the right typed slot.
  *
  * Path resolution: arg[0] → `SMOBILPAY_SMOKE_CONFIG` env → `./smoke-test.json`
  * in CWD (identical to Java).
@@ -147,6 +150,7 @@ final class SmokeTest
             $this->detail('server version: ' . $pong->version);
             $this->detail('nonce echo:     ' . ($pong->nonce ?? '<null>'));
             $this->detail('public key:     ' . $pong->key);
+            $this->dumpFields('Ping (all fields)', $pong);
         });
     }
 
@@ -174,6 +178,7 @@ final class SmokeTest
             $this->detail("balance:         {$a->balance} {$a->currency}");
             $this->detail("daily limit max: {$a->limitMax}");
             $this->detail("limit remaining: {$a->limitRemaining}");
+            $this->dumpFields('Account (all fields)', $a);
         });
     }
 
@@ -190,6 +195,7 @@ final class SmokeTest
             if (\count($merchants) > $sample) {
                 $this->detail('  ...and ' . (\count($merchants) - $sample) . ' more');
             }
+            $this->dumpFields('Merchant[0] (all fields)', $merchants[0]);
         });
     }
 
@@ -222,6 +228,7 @@ final class SmokeTest
                     ));
                 }
             }
+            $this->dumpFields('Service[0] (all fields)', $services[0]);
         });
     }
 
@@ -477,6 +484,7 @@ final class SmokeTest
                 $this->detail('destination: ' . $a->destination);
                 $this->detail('status:      ' . $a->status->value);
                 $this->detail('name:        ' . ($a->name ?? '<null>'));
+                $this->dumpFields('CustomerAccount (all fields)', $a);
             } catch (SmobilpayApiException $e) {
                 if ($e->httpStatus() === 401) {
                     $this->skip('GET /v2/validate is a restricted endpoint and is not enabled'
@@ -508,6 +516,9 @@ final class SmokeTest
                     $s->trid ?? 'null',
                 ));
             }
+            if ($rows !== []) {
+                $this->dumpFields('PaymentStatus[0] (all fields)', $rows[0]);
+            }
         });
     }
 
@@ -533,6 +544,7 @@ final class SmokeTest
                 'cannot quote with amount=' . $amount . ' — set "amount" in this block of smoke-test.json',
             );
         }
+        $this->dumpFields('PaymentItem (all fields)', $item);
         $payItemId = $item->payItemId;
         \assert(\is_string($payItemId));
         $quote = $client->initiate()->quote(new QuoteRequest($amount, $payItemId));
@@ -541,6 +553,7 @@ final class SmokeTest
         $this->detail("price (local):  {$quote->priceLocalCur} {$quote->localCur}");
         $this->detail("price (system): {$quote->priceSystemCur} {$quote->systemCur}");
         $this->detail('promotion:      ' . ($quote->promotion ?? '<null>'));
+        $this->dumpFields('QuoteResponse (all fields)', $quote);
 
         if ($cfg !== null && ($cfg['collect'] ?? false) === true) {
             $this->collectAndReport($client, $quote, $cfg);
@@ -632,6 +645,7 @@ final class SmokeTest
         if ($response->pin !== null) {
             $this->detail('pin:             ' . $response->pin);
         }
+        $this->dumpFields('CollectionResponse (all fields)', $response);
 
         if (!$this->offline) {
             // Give the server a moment to settle before re-checking.
@@ -649,6 +663,7 @@ final class SmokeTest
             $v->status->value,
             $v->clearingDate?->format('Y-m-d') ?? 'null',
         ));
+        $this->dumpFields('PaymentStatus[0] (all fields)', $v);
     }
 
     private function generateTrid(): string
@@ -720,6 +735,116 @@ final class SmokeTest
             $line = $this->stripVolatileFields($line);
         }
         echo '     ' . $line . PHP_EOL;
+    }
+
+    /**
+     * Dump every public property of a DTO so the smoke run proves that
+     * each field decoded from the wire was actually parsed. Handles
+     * scalars, DateTimeInterface, UUIDs, BackedEnums, arrays, and
+     * nested DTOs (recurses with indent).
+     */
+    private function dumpFields(string $label, object $obj, int $indent = 0): void
+    {
+        $this->detail(str_repeat('  ', $indent) . $label . ':');
+        $this->dumpObjectVars($obj, $indent + 1);
+    }
+
+    private function dumpObjectVars(object $obj, int $indent): void
+    {
+        $vars = get_object_vars($obj);
+        if ($vars === []) {
+            $this->detail(str_repeat('  ', $indent) . '(no public fields)');
+
+            return;
+        }
+        /** @var int $maxKeyLen */
+        $maxKeyLen = max(array_map('strlen', array_keys($vars)));
+        $pad = str_repeat('  ', $indent);
+        foreach ($vars as $key => $value) {
+            $this->dumpKeyValue($pad . str_pad($key, $maxKeyLen), $value, $indent);
+        }
+    }
+
+    private function dumpKeyValue(string $prefix, mixed $value, int $indent): void
+    {
+        if ($this->isScalarish($value)) {
+            $this->detail($prefix . ' = ' . $this->formatScalar($value));
+
+            return;
+        }
+        if (\is_array($value)) {
+            $this->dumpArray($prefix, $value, $indent);
+
+            return;
+        }
+        if (\is_object($value)) {
+            $this->detail($prefix . ' = ' . (new ReflectionClass($value))->getShortName() . ':');
+            $this->dumpObjectVars($value, $indent + 1);
+
+            return;
+        }
+        $this->detail($prefix . ' = ?(' . \gettype($value) . ')');
+    }
+
+    /**
+     * @param array<int|string, mixed> $value
+     */
+    private function dumpArray(string $prefix, array $value, int $indent): void
+    {
+        if ($value === []) {
+            $this->detail($prefix . ' = []');
+
+            return;
+        }
+        $this->detail($prefix . ' = [' . \count($value) . ' items]');
+        $childPad = str_repeat('  ', $indent + 1);
+        $shown = 0;
+        foreach ($value as $i => $item) {
+            if ($shown >= 3) {
+                $this->detail($childPad . '... and ' . (\count($value) - 3) . ' more');
+                break;
+            }
+            if (\is_object($item) && !$this->isScalarish($item)) {
+                $this->detail($childPad . '[' . $i . '] ' . (new ReflectionClass($item))->getShortName() . ':');
+                $this->dumpObjectVars($item, $indent + 2);
+            } else {
+                $this->detail($childPad . '[' . $i . '] ' . $this->formatScalar($item));
+            }
+            $shown++;
+        }
+    }
+
+    private function isScalarish(mixed $v): bool
+    {
+        return $v === null
+            || \is_scalar($v)
+            || $v instanceof \DateTimeInterface
+            || $v instanceof \Ramsey\Uuid\UuidInterface
+            || $v instanceof \BackedEnum;
+    }
+
+    private function formatScalar(mixed $v): string
+    {
+        if ($v === null) {
+            return '<null>';
+        }
+        if (\is_bool($v)) {
+            return $v ? 'true' : 'false';
+        }
+        if ($v instanceof \DateTimeInterface) {
+            return $v->format(DATE_ATOM);
+        }
+        if ($v instanceof \Ramsey\Uuid\UuidInterface) {
+            return $v->toString();
+        }
+        if ($v instanceof \BackedEnum) {
+            return (string) $v->value;
+        }
+        if (\is_float($v)) {
+            return rtrim(rtrim(sprintf('%.4f', $v), '0'), '.');
+        }
+
+        return (string) $v;
     }
 
     private function banner(string $message): void
