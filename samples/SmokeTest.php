@@ -33,13 +33,12 @@ use Throwable;
  * configured environment) and then polls `/v2/verifytx` once. Omit
  * `collect` (or set it to `false`) to stay quote-only.
  *
- * Each scenario prints a one-line headline summary mirroring the Java
- * and Node.js clients, plus a full `(all fields)` dump of every parsed
- * DTO property so the run doubles as proof that every wire field
- * decoded into the right typed slot.
+ * Each scenario prints a one-line headline summary plus a full
+ * `(all fields)` dump of every parsed DTO property so the run doubles
+ * as proof that every wire field decoded into the right typed slot.
  *
  * Path resolution: arg[0] → `SMOBILPAY_SMOKE_CONFIG` env → `./smoke-test.json`
- * in CWD (identical to Java).
+ * in CWD.
  *
  * Flags:
  *  - `--offline`         Use fixture responses instead of real HTTP (zero
@@ -47,8 +46,8 @@ use Throwable;
  *                        Opt-in collects are replayed against
  *                        `collect-response.json` + `verifytx.json`.
  *  - `--strip-volatile`  Scrub timestamp / JWT-prefix / UUID / PTN lines
- *                        from the output so the result diffs cleanly
- *                        against Java's run.
+ *                        from the output so the result is reproducible
+ *                        across runs.
  *
  * Exit codes: 0 on all passed/skipped, 1 on any failure, 2 on config error.
  */
@@ -489,7 +488,7 @@ final class SmokeTest
                 if ($e->httpStatus() === 401) {
                     $this->skip('GET /v2/validate is a restricted endpoint and is not enabled'
                         . ' for this partner (HTTP 401). Compliance review is required —'
-                        . ' contact your Maviance integration manager.');
+                        . ' contact your account manager to request enablement.');
                 }
                 throw $e;
             }
@@ -573,9 +572,9 @@ final class SmokeTest
      * `customerPhonenumber` is the PAYER's MSISDN. For *disbursement* flows
      * (cashin) it is the RECIPIENT's MSISDN — money flows INTO that wallet.
      *
-     * WARNING: this moves real money on the partner balance. Acceptance
-     * transactions are not reversible from the client; if you collect by
-     * mistake, contact your Maviance integration manager.
+     * WARNING: this moves real money on the partner balance. Transactions
+     * are not reversible from the client; if you collect by mistake,
+     * contact your account manager.
      *
      * @param array<string, mixed> $cfg per-flow config block; must contain
      *                                  `customerPhonenumber` and
@@ -871,8 +870,8 @@ final class SmokeTest
     }
 
     /**
-     * Volatile-field scrubber so Java/PHP outputs diff cleanly. Strips
-     * server times, bearer JWT prefixes, UUIDs, PTNs, timestamp fields.
+     * Volatile-field scrubber for reproducible output. Strips server
+     * times, bearer JWT prefixes, UUIDs, PTNs, and timestamp fields.
      */
     private function stripVolatileFields(string $line): string
     {
@@ -1054,8 +1053,7 @@ final class SmokeTest
               --offline         Replay fixture JSON instead of hitting the network. Useful as
                                 a self-documenting demo and to smoke-test the harness itself.
               --strip-volatile  Scrub timestamps, JWT prefixes, UUIDs and PTNs from detail
-                                lines so the output diffs cleanly against the Java client's
-                                `./gradlew runSmokeTest`. Same regex on both sides.
+                                lines so the output is reproducible across runs.
 
             EXIT CODES
               0   all scenarios passed or skipped

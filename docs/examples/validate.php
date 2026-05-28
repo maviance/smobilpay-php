@@ -25,7 +25,7 @@ try {
 } catch (SmobilpayApiException $e) {
     if ($e->httpStatus() === 401) {
         fwrite(STDERR, "/v2/validate is restricted and not enabled for this partner.\n"
-            . "Contact support@smobilpay.com to request enablement.\n");
+            . "Contact your account manager to request enablement.\n");
         exit(2);
     }
     throw $e;

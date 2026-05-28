@@ -27,9 +27,6 @@ use Throwable;
  *  - `YYYY-MM-DDTHH:MM:SS.uuuuuu[Z|±HH:MM]`  — fractional-second variants
  *
  * Null and blank input return `null`.
- *
- * Mirrors the Java client's `LenientLocalDateDeserializer` behaviour for
- * cross-language smoke-test parity.
  */
 final class LenientDateParser
 {

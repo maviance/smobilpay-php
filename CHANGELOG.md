@@ -38,9 +38,9 @@ in-place upgrade path — see [UPGRADING.md](./UPGRADING.md).
 - `Maviance\Smobilpay\Http\JsonSerializer` — hand-rolled reflection
   encoder/decoder for `readonly` DTOs. `#[ListOf(...)]` attribute for
   nested-list element typing.
-- `Maviance\Smobilpay\Http\LenientDateParser` — mirrors the Java
-  client's date tolerance; accepts ISO date / offset datetime / zoned /
-  local datetime / instant variants.
+- `Maviance\Smobilpay\Http\LenientDateParser` — date-tolerant parser;
+  accepts ISO date / offset datetime / zoned / local datetime / instant
+  variants.
 - 27 `readonly` model DTOs + 6 enums covering every partner-spec
   endpoint, including the new `GET /v2/validate` →
   `CustomerAccount` with tri-state `Status` enum
@@ -51,16 +51,15 @@ in-place upgrade path — see [UPGRADING.md](./UPGRADING.md).
   `SmobilpayConfigException` extends `\InvalidArgumentException` for
   caller-input errors.
 - `bin/smoke-test` + `samples/SmokeTest.php` — 15-scenario smoke-test
-  harness that reads the same `smoke-test.json` format as the Java
-  client, emits the same `RUN`/`PASS`/`SKIP`/`FAIL` output, and
-  supports `--offline` (fixture replay) and `--strip-volatile`
-  (timestamp/UUID/JWT scrubbing for cross-language diff). Quote-only
-  by default; every collection-bearing block (cashout, bill, topup,
-  voucher, product, subscription, cashin) can opt in to a full
-  `POST /v2/collectstd` + one-shot `/v2/verifytx` poll by setting
-  `"collect": true` with `customerPhonenumber` + `customerEmailaddress`,
-  matching the Node.js client's `nodejs/samples/smoke-test.js`
-  opt-in mechanic.
+  harness that reads a `smoke-test.json` config, emits one-line
+  `RUN`/`PASS`/`SKIP`/`FAIL` headlines plus a full `(all fields)` dump
+  of every parsed response DTO, and supports `--offline` (fixture
+  replay) and `--strip-volatile` (timestamp/UUID/JWT scrubbing for
+  reproducible diffs). Quote-only by default; every collection-bearing
+  block (cashout, bill, topup, voucher, product, subscription, cashin)
+  can opt in to a full `POST /v2/collectstd` + one-shot `/v2/verifytx`
+  poll by setting `"collect": true` with `customerPhonenumber` +
+  `customerEmailaddress`.
 - Comprehensive test suite: unit tests for OAuth lifecycle, JSON
   serializer, date parser, query encoder, model invariants, exception
   payloads; integration tests for every API class using
@@ -69,8 +68,8 @@ in-place upgrade path — see [UPGRADING.md](./UPGRADING.md).
   `lowest`/`highest` matrix; lint, PHPStan level 8, PHPUnit,
   coverage ≥80% line on `src/` (excluding `src/Model/`), offline
   smoke-test self-check.
-- README rewritten as the structural twin of the Java client's
-  README — section for section, idiom for idiom.
+- README rewritten end-to-end for the v3 surface — section per concept,
+  PHP idioms throughout.
 
 ### Changed
 
@@ -91,5 +90,3 @@ v2.x HMAC users to v3.x OAuth 2.0.
 
 See git history. v2.x stays on Packagist as `maviance/smobilpay-php`
 for partners not yet ready to move to OAuth 2.0.
-
-[3.2.0]: https://github.com/maviance/smobilpay-php-client/releases/tag/v3.2.0

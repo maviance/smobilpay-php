@@ -59,11 +59,11 @@ final class AccountValidationApi
      * against the provider.
      *
      * **Restricted endpoint.** Access is granted only to partners who have
-     * cleared Maviance's internal validation and compliance review (KYC /
-     * data-protection obligations apply to the returned customer name).
-     * Unauthorized callers receive HTTP 401 as a
+     * cleared the API provider's compliance review (data-protection
+     * obligations apply to the returned customer name). Unauthorized
+     * callers receive HTTP 401 as a
      * {@see \Maviance\Smobilpay\Exception\SmobilpayApiException}. Contact
-     * your integration manager to request enablement.
+     * your account manager to request enablement.
      */
     public function validateAccount(string $destination, int $serviceId): CustomerAccount
     {

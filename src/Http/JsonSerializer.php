@@ -23,7 +23,7 @@ use Throwable;
  * Encoding rules:
  *  - Reflects public properties of the object (readonly DTOs use constructor
  *    property promotion, so all promoted props are public).
- *  - Skips `null` properties (mirrors Jackson's `@JsonInclude(NON_NULL)`).
+ *  - Skips `null` properties on serialization.
  *  - {@see DateTimeInterface} → ISO 8601 offset datetime.
  *  - {@see BackedEnum} → its `value`.
  *  - {@see UuidInterface} → its canonical string.
@@ -41,8 +41,7 @@ use Throwable;
  *  - {@see UuidInterface} → {@see Uuid::fromString()}.
  *  - `array` parameters with a {@see ListOf} attribute hydrate each element
  *    as the declared class. Bare `array` stays a plain array.
- *  - Unknown JSON keys are ignored (forward-compatibility — matches Java's
- *    `FAIL_ON_UNKNOWN_PROPERTIES = false`).
+ *  - Unknown JSON keys are ignored (forward-compatibility).
  *  - Missing required parameters throw {@see SmobilpayParseException}.
  *  - {@see stdClass} target: returns a stdClass with the decoded object's
  *    keys copied verbatim.

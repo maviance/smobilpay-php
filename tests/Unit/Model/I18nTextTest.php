@@ -28,11 +28,9 @@ final class I18nTextTest extends TestCase
 
     public function testServiceWithNullLocalTextEntryDecodes(): void
     {
-        // Regression for the failure observed in production against the
-        // Maviance acceptance environment:
-        //   FAIL Service catalog - SmobilpayParseException:
-        //     Field "localText" on Maviance\Smobilpay\Model\I18nText is
-        //     non-nullable but JSON value was null
+        // Regression: the server is observed to send `null` for I18nText.localText
+        // in production. Decoding must succeed (treat as nullable) rather than
+        // throw SmobilpayParseException.
         $json = json_encode([
             'serviceid' => 1, 'merchant' => 'ENEO', 'title' => 't',
             'description' => null, 'category' => null,

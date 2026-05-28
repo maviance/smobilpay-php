@@ -15,7 +15,7 @@ use Throwable;
  * {@see SmobilpayTransportException} (network failure). A
  * {@see SmobilpayParseException} indicates the server returned data the
  * client cannot make sense of — usually a contract drift that should be
- * reported to Maviance support.
+ * reported to your API provider.
  */
 final class SmobilpayParseException extends SmobilpayException
 {

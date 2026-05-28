@@ -118,7 +118,7 @@ final class VerifyApi
     /**
      * `GET /v2/historystd` by date range — search history by an inclusive
      * date range. Both `$from` and `$to` are interpreted at UTC midnight
-     * and end-of-day respectively (mirrors the Java client).
+     * and end-of-day respectively.
      *
      * @return list<PaymentStatus>
      */

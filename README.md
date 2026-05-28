@@ -6,11 +6,6 @@ This is the curated, partner-facing client. It covers every endpoint a
 partner integrator needs to move money in and out, sell value-added
 services, and drive a payment UI from the static catalog.
 
-> The sibling Java client at `org.maviance:smobilpay-java-client:3.2.0`
-> exposes the same flows, the same scenarios, and the same smoke-test
-> JSON config — so this PHP client and that Java client can be
-> diff-compared against the same partner environment.
-
 ## What this client does
 
 - **Payment collections.** Take payment from a customer's mobile wallet
@@ -36,7 +31,7 @@ services, and drive a payment UI from the static catalog.
 - `ext-curl`, `ext-json`, `ext-mbstring`.
 - A **PSR-18** HTTP client implementation + matching **PSR-17** factories
   (BYO — see Installation below).
-- Network access to the base URL issued by Maviance support.
+- Network access to the base URL issued by your API provider.
 - An OAuth 2.0 credential pair (`publicKey` / `secretKey`) issued during
   partner onboarding.
 
@@ -379,9 +374,9 @@ switch ($account->status) {
 }
 ```
 
-`/v2/validate` is gated behind compliance/KYC review — unauthorized
-callers receive HTTP 401 as `SmobilpayApiException`. Contact your
-integration manager to request enablement.
+`/v2/validate` is gated behind the API provider's compliance review —
+unauthorized callers receive HTTP 401 as `SmobilpayApiException`. Contact
+your account manager to request enablement.
 
 ## Catalog discovery
 
@@ -482,10 +477,10 @@ methods to derive an immutable copy.
 ## Smoke test
 
 The library ships a `bin/smoke-test` harness that exercises every flow
-against a real partner environment. It reads the same `smoke-test.json`
-config that the Java client reads, runs the same 15 scenarios in the
-same order, and emits the same `RUN`/`PASS`/`SKIP`/`FAIL` output —
-so the two runs can be diff-compared:
+against a real partner environment. It reads a `smoke-test.json` config,
+runs 15 scenarios in a fixed order, and emits one-line
+`RUN`/`PASS`/`SKIP`/`FAIL` headlines plus a full `(all fields)` dump of
+every parsed response DTO:
 
 ```bash
 cp smoke-test.example.json smoke-test.json
@@ -493,17 +488,8 @@ cp smoke-test.example.json smoke-test.json
 # per-flow blocks you want exercised
 
 composer smoke                      # online run
-composer smoke -- --strip-volatile  # online + scrub timestamps/UUIDs for diff
+composer smoke -- --strip-volatile  # online + scrub timestamps/UUIDs
 composer smoke -- --offline         # replay fixtures, no network
-```
-
-Compare against Java side-by-side:
-
-```bash
-export SMOBILPAY_SMOKE_CONFIG=$PWD/smoke-test.json
-( cd ../java && ./gradlew runSmokeTest --console=plain -q ) > /tmp/java.log
-composer smoke -- --strip-volatile > /tmp/php.log
-diff -u /tmp/java.log /tmp/php.log
 ```
 
 The smoke test is **quote-only by default** — it never calls
@@ -520,18 +506,16 @@ The smoke test is **quote-only by default** — it never calls
 (plus any of the optional pass-through fields `customerName`,
 `customerAddress`, `customerNumber`, `serviceNumber`, `tag`, `callbackUrl`,
 `cdata`, `trid`). When the opt-in is set, the scenario follows the quote
-with a real `POST /v2/collectstd` and a one-shot `/v2/verifytx` poll —
-matching the behaviour of the Node.js (`nodejs/samples/smoke-test.js`)
-and Java (`java/src/samples/.../SmokeTest.java`) smoke harnesses.
+with a real `POST /v2/collectstd` and a one-shot `/v2/verifytx` poll.
 **Enabling `collect: true` moves real money** on the configured
 environment, so leave it off when running against production.
 
 ## Onboarding
 
 Base URL, partner credentials (`publicKey` / `secretKey`), callback URL
-registration, and the full error catalog are issued by Maviance support
+registration, and the full error catalog are issued by the API provider
 during partner onboarding. They are intentionally not published in the
-spec or this README. Contact **support@smobilpay.com**.
+spec or this README. Contact your account manager for partner enrollment.
 
 ## Development
 

@@ -1,6 +1,5 @@
 {
     "_doc": "Smoke-test config. Copy to smoke-test.json (gitignored) and fill in.",
-    "_doc_compat": "Same schema as the Java and Node.js clients (see /root/s3p-clients/java/smoke-test.json and /root/s3p-clients/nodejs/smoke-test.json).",
     "_doc_collect": "Every collection-bearing block (cashout, bill, topup, voucher, product, subscription, cashin) can opt in to a real POST /v2/collectstd by adding: \"collect\": true plus \"customerPhonenumber\" and \"customerEmailaddress\" (and optionally customerName, customerAddress, customerNumber, serviceNumber, tag, callbackUrl, cdata, trid). Without \"collect\": true the harness stays quote-only. The cashin block below shows the opt-in shape under leading-underscore keys so it stays dormant in this template; drop the underscores to enable. WARNING: an enabled opt-in MOVES REAL MONEY when run online.",
 
     "baseUrl":    "https://api.example.invalid",

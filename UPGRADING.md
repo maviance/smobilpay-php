@@ -6,10 +6,10 @@ OAuth 2.0 instead of HMAC. The packages can coexist in your
 
 ## 1. Get OAuth 2.0 credentials
 
-Contact **support@smobilpay.com** for partner re-onboarding. You will
+Contact your account manager for partner re-onboarding. You will
 receive a `publicKey` / `secretKey` pair that replaces your old HMAC
-`token` / `secret`. The S3P API server no longer accepts HMAC
-signatures, so this step is required before any v3.x code can connect.
+`token` / `secret`. The Smobilpay partner API server no longer accepts
+HMAC signatures, so this step is required before any v3.x code can connect.
 
 ## 2. Update composer.json
 

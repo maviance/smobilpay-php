@@ -6,7 +6,7 @@ must satisfy a high quality bar.
 ## Quick start
 
 ```bash
-git clone https://github.com/maviance/smobilpay-php-client
+git clone <repository-url>
 cd smobilpay-php-client
 composer install
 composer check          # lint + stan + test (the local pre-commit gate)
@@ -37,21 +37,9 @@ Conventional commit prefixes: `feat:`, `fix:`, `refactor:`, `docs:`,
 4. If your change touches the wire surface, update fixtures in
    `tests/Fixtures/` and re-run the offline smoke test
    (`composer smoke -- --offline`).
-5. If your change adjusts the cross-language parity with the Java
-   client (`/root/s3p-clients/java` or the public mirror), call it out
-   in the PR description and run the diff comparison as documented in
-   the README.
-
-## Design changes
-
-For non-trivial architecture changes, write a short design note under
-`docs/superpowers/specs/YYYY-MM-DD-<topic>.md`, get review, then
-implement. The seed spec for the v3 rewrite lives at
-`docs/superpowers/specs/2026-05-27-php-client-rewrite-v3.2-design.md`.
 
 ## Reporting security issues
 
-Do not file public GitHub issues for security findings. Email
-**support@smobilpay.com** with `[SECURITY]` in the subject. We
-coordinate disclosure and credit researchers in the changelog when
-appropriate.
+Do not file public issues for security findings. Coordinate disclosure
+through the repository maintainers' private channel; researchers may
+be credited in the changelog when appropriate.

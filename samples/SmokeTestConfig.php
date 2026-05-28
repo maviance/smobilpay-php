@@ -8,8 +8,7 @@ use RuntimeException;
 use Throwable;
 
 /**
- * Configuration record for {@see SmokeTest}, loaded from a single JSON file
- * with the same schema as the Java client's smoke-test.json.
+ * Configuration record for {@see SmokeTest}, loaded from a single JSON file.
  *
  * All per-flow blocks are optional: a block that is absent or null causes
  * the corresponding scenario to be skipped. See `smoke-test.example.json`
@@ -27,9 +26,6 @@ use Throwable;
  *  - optional pass-through:  `customerName`, `customerAddress`,
  *                            `customerNumber`, `serviceNumber`, `tag`,
  *                            `callbackUrl`, `cdata`, `trid`
- *
- * Identical schema (and identical opt-in semantics) to the Node.js client
- * at `nodejs/samples/smoke-test.js`.
  *
  * @phpstan-type CollectOptIn array{collect?: bool, customerPhonenumber?: string|null, customerEmailaddress?: string|null, customerName?: string|null, customerAddress?: string|null, customerNumber?: string|null, serviceNumber?: string|null, tag?: string|null, callbackUrl?: string|null, cdata?: string|null, trid?: string|null}
  * @phpstan-type CashoutCfg array{serviceId: int, amount: int}&CollectOptIn

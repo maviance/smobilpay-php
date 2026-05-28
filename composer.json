@@ -4,28 +4,19 @@
     "type": "library",
     "license": "Apache-2.0",
     "version": "3.2.0",
-    "homepage": "https://www.smobilpay.cm",
     "keywords": [
         "smobilpay",
-        "s3p",
         "mobile-money",
         "bill-payments",
         "topup",
         "payments",
-        "maviance",
         "psr-18"
     ],
     "authors": [
         {
-            "name": "Maviance Developer Relations",
-            "email": "support@smobilpay.com",
-            "homepage": "https://www.maviance.com"
+            "name": "Maviance"
         }
     ],
-    "support": {
-        "email": "support@smobilpay.com",
-        "issues": "https://github.com/maviance/smobilpay-php-client/issues"
-    },
     "require": {
         "php": "^8.2",
         "ext-curl": "*",
