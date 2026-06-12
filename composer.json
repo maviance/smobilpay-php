@@ -3,7 +3,6 @@
     "description": "PHP client library for the Smobilpay partner API (v3.2.0).",
     "type": "library",
     "license": "Apache-2.0",
-    "version": "3.2.0",
     "keywords": [
         "smobilpay",
         "mobile-money",
