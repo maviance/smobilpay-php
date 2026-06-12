@@ -55,6 +55,9 @@ final class OAuth2TokenManagerTest extends TestCase
         self::assertSame('POST', $req->getMethod());
         self::assertStringEndsWith('/oauth/token', (string) $req->getUri());
         self::assertSame('grant_type=client_credentials', (string) $req->getBody());
+        // RFC 6749 §4.4.2 — S3P /oauth/token rejects a non-form content type
+        // (MPAY-30022); pin the header so a refactor can't drift to JSON.
+        self::assertSame('application/x-www-form-urlencoded', $req->getHeaderLine('Content-Type'));
         $authHeader = $req->getHeaderLine('Authorization');
         self::assertStringStartsWith('Basic ', $authHeader);
         $decoded = base64_decode(substr($authHeader, 6), true);
