@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Maviance\Smobilpay\Samples;
 
+use BackedEnum;
 use DateTimeImmutable;
+use DateTimeInterface;
 use DateTimeZone;
 use Http\Mock\Client as MockHttpClient;
 use Maviance\Smobilpay\Exception\SmobilpayApiException;
@@ -109,7 +111,7 @@ final class SmokeTest
         $config = $this->buildSmobilpayConfig();
         $client = SmobilpayClient::create($config, $http, $factory, $factory);
 
-        $banner = sprintf(
+        $banner = \sprintf(
             'Smobilpay smoke test  —  baseUrl=%s, apiVersion=%s, publicKey=%s%s',
             $this->redactBaseUrl($config->baseUrl),
             $config->apiVersion,
@@ -219,7 +221,7 @@ final class SmokeTest
             if ($verifiable !== []) {
                 $this->detail("verifiable services (isVerifiable=true) — candidates for the 'verify' block:");
                 foreach ($verifiable as $s) {
-                    $this->detail(sprintf(
+                    $this->detail(\sprintf(
                         '  - serviceId=%d merchant=%s title=%s',
                         $s->serviceid,
                         $s->merchant,
@@ -242,7 +244,7 @@ final class SmokeTest
         }
         $this->detail($label . ':');
         foreach ($matches as $s) {
-            $this->detail(sprintf(
+            $this->detail(\sprintf(
                 '  - serviceId=%d merchant=%s title=%s',
                 $s->serviceid,
                 $s->merchant,
@@ -263,7 +265,7 @@ final class SmokeTest
                 throw new RuntimeException('no cashout items for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(sprintf(
+            $this->detail(\sprintf(
                 'picked: %s (%s, %s, local=%s %s)',
                 $item->payItemId,
                 $item->name ?? '',
@@ -284,7 +286,7 @@ final class SmokeTest
             }
             $bills = $client->initiate()->bills($c['merchant'], $c['serviceId'], $c['serviceNumber']);
             if ($bills === []) {
-                throw new RuntimeException(sprintf(
+                throw new RuntimeException(\sprintf(
                     'no bills for %s/%d/%s',
                     $c['merchant'],
                     $c['serviceId'],
@@ -292,7 +294,7 @@ final class SmokeTest
                 ));
             }
             $bill = $bills[0];
-            $this->detail(sprintf(
+            $this->detail(\sprintf(
                 'picked: %s (%s, amount=%s %s, due=%s)',
                 $bill->payItemId,
                 $bill->billType?->value ?? 'null',
@@ -317,7 +319,7 @@ final class SmokeTest
                 throw new RuntimeException('no topup items for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(sprintf(
+            $this->detail(\sprintf(
                 'picked: %s (%s, %s, local=%s %s)',
                 $item->payItemId,
                 $item->name ?? '',
@@ -349,7 +351,7 @@ final class SmokeTest
                 throw new RuntimeException('no vouchers for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(sprintf(
+            $this->detail(\sprintf(
                 'picked: %s (%s, %s, local=%s %s)',
                 $item->payItemId,
                 $item->name ?? '',
@@ -373,7 +375,7 @@ final class SmokeTest
                 throw new RuntimeException('no products for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(sprintf(
+            $this->detail(\sprintf(
                 'picked: %s (%s, %s, local=%s %s)',
                 $item->payItemId,
                 $item->name ?? '',
@@ -405,7 +407,7 @@ final class SmokeTest
                 throw new RuntimeException('no subscriptions for ' . $c['merchant'] . '/' . $c['serviceId']);
             }
             $sub = $subs[0];
-            $this->detail(sprintf(
+            $this->detail(\sprintf(
                 'picked: %s (%s, customer=%s, amount=%s %s, due=%s)',
                 $sub->payItemId,
                 $sub->name ?? '',
@@ -430,7 +432,7 @@ final class SmokeTest
                 throw new RuntimeException('no cashin items for serviceId=' . $c['serviceId']);
             }
             $item = $items[0];
-            $this->detail(sprintf(
+            $this->detail(\sprintf(
                 'picked: %s (%s, %s, local=%s %s)',
                 $item->payItemId,
                 $item->name ?? '',
@@ -455,7 +457,7 @@ final class SmokeTest
                     $c['serviceId'],
                     $c['serviceNumber'],
                 );
-                $this->detail(sprintf(
+                $this->detail(\sprintf(
                     '%s for %s/%d -> %s',
                     $c['serviceNumber'],
                     $c['merchant'],
@@ -506,7 +508,7 @@ final class SmokeTest
             $sample = min(30, \count($rows));
             for ($i = 0; $i < $sample; $i++) {
                 $s = $rows[$i];
-                $this->detail(sprintf(
+                $this->detail(\sprintf(
                     '  - %s : %s, %s %s, trid=%s',
                     $s->ptn,
                     $s->status->value,
@@ -657,7 +659,7 @@ final class SmokeTest
             return;
         }
         $v = $verifications[0];
-        $this->detail(sprintf(
+        $this->detail(\sprintf(
             'verifytx:        status=%s clearingDate=%s',
             $v->status->value,
             $v->clearingDate?->format('Y-m-d') ?? 'null',
@@ -667,7 +669,7 @@ final class SmokeTest
 
     private function generateTrid(): string
     {
-        return sprintf(
+        return \sprintf(
             'php-smoke-%d-%s',
             (int) (microtime(true) * 1000),
             bin2hex(random_bytes(3)),
@@ -685,7 +687,7 @@ final class SmokeTest
         if ($local !== null && $local >= 1.0) {
             return (int) $local;
         }
-        throw new RuntimeException(sprintf(
+        throw new RuntimeException(\sprintf(
             'item %s has no fixed catalog amount. Set "amount" in this block of smoke-test.json.',
             $item->payItemId ?? '?',
         ));
@@ -817,9 +819,9 @@ final class SmokeTest
     {
         return $v === null
             || \is_scalar($v)
-            || $v instanceof \DateTimeInterface
+            || $v instanceof DateTimeInterface
             || $v instanceof \Ramsey\Uuid\UuidInterface
-            || $v instanceof \BackedEnum;
+            || $v instanceof BackedEnum;
     }
 
     private function formatScalar(mixed $v): string
@@ -830,17 +832,17 @@ final class SmokeTest
         if (\is_bool($v)) {
             return $v ? 'true' : 'false';
         }
-        if ($v instanceof \DateTimeInterface) {
+        if ($v instanceof DateTimeInterface) {
             return $v->format(DATE_ATOM);
         }
         if ($v instanceof \Ramsey\Uuid\UuidInterface) {
             return $v->toString();
         }
-        if ($v instanceof \BackedEnum) {
+        if ($v instanceof BackedEnum) {
             return (string) $v->value;
         }
         if (\is_float($v)) {
-            return rtrim(rtrim(sprintf('%.4f', $v), '0'), '.');
+            return rtrim(rtrim(\sprintf('%.4f', $v), '0'), '.');
         }
 
         return (string) $v;
@@ -857,7 +859,7 @@ final class SmokeTest
     private function printSummary(): void
     {
         echo self::SEP . PHP_EOL;
-        echo sprintf('Summary: %d passed, %d skipped, %d failed', $this->passed, $this->skipped, $this->failed) . PHP_EOL;
+        echo \sprintf('Summary: %d passed, %d skipped, %d failed', $this->passed, $this->skipped, $this->failed) . PHP_EOL;
         echo self::SEP . PHP_EOL;
     }
 
