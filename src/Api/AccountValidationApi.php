@@ -61,7 +61,9 @@ final class AccountValidationApi
      * **Restricted endpoint.** Access is granted only to partners who have
      * cleared the API provider's compliance review (data-protection
      * obligations apply to the returned customer name). Unauthorized
-     * callers receive HTTP 401 as a
+     * callers receive HTTP 401; the client performs one automatic token
+     * refresh and retry on a 401, so when the cause is missing clearance the
+     * retry returns 401 again and surfaces as a
      * {@see \Maviance\Smobilpay\Exception\SmobilpayApiException}. Contact
      * your account manager to request enablement.
      */

@@ -58,8 +58,7 @@ final class HttpTransport
      */
     public function get(string $path, QueryParams $query, string|array $type): mixed
     {
-        $request = $this->buildAuthedRequest('GET', $path, $query);
-        $body = $this->execute($request);
+        $body = $this->execute(fn () => $this->buildAuthedRequest('GET', $path, $query));
 
         return $this->serializer->decode($body, $type);
     }
@@ -71,9 +70,7 @@ final class HttpTransport
      */
     public function getRaw(string $path, QueryParams $query): string
     {
-        $request = $this->buildAuthedRequest('GET', $path, $query);
-
-        return $this->execute($request);
+        return $this->execute(fn () => $this->buildAuthedRequest('GET', $path, $query));
     }
 
     /**
@@ -86,10 +83,9 @@ final class HttpTransport
     public function post(string $path, object $body, string|array $type): mixed
     {
         $json = $this->serializer->encode($body);
-        $request = $this->buildAuthedRequest('POST', $path, QueryParams::of())
+        $responseBody = $this->execute(fn () => $this->buildAuthedRequest('POST', $path, QueryParams::of())
             ->withHeader(self::HEADER_CONTENT_TYPE, self::CONTENT_TYPE_JSON)
-            ->withBody($this->streamFactory->createStream($json));
-        $responseBody = $this->execute($request);
+            ->withBody($this->streamFactory->createStream($json)));
 
         return $this->serializer->decode($responseBody, $type);
     }
@@ -117,22 +113,27 @@ final class HttpTransport
         return $uri;
     }
 
-    private function execute(\Psr\Http\Message\RequestInterface $request): string
+    /**
+     * Sends the request produced by $buildRequest, retrying once on a 401
+     * after forcing a token refresh.
+     *
+     * $buildRequest is a factory because the retry needs a fresh request: the
+     * body stream is single-use and the retry must carry the refreshed bearer.
+     * A 401 is returned at the auth layer before any business logic runs, so a
+     * single refresh-and-retry is safe even for non-idempotent POSTs. The retry
+     * is bounded to one attempt; a persistent 401 still throws
+     * {@see SmobilpayApiException}.
+     *
+     * @param \Closure(): \Psr\Http\Message\RequestInterface $buildRequest
+     */
+    private function execute(\Closure $buildRequest): string
     {
-        $this->logger?->debug('smobilpay.http.request', [
-            'method' => $request->getMethod(),
-            'uri' => (string) $request->getUri(),
-        ]);
-        try {
-            $response = $this->httpClient->sendRequest($request);
-        } catch (ClientExceptionInterface $e) {
-            $this->logger?->warning('smobilpay.http.transport_error', ['error' => $e->getMessage()]);
-
-            throw new SmobilpayTransportException(
-                'HTTP transport error: ' . $e->getMessage(),
-                $e,
-            );
+        $response = $this->send($buildRequest());
+        if ($response->getStatusCode() === 401) {
+            $this->tokenManager->refresh();
+            $response = $this->send($buildRequest());
         }
+
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();
         $this->logger?->debug('smobilpay.http.response', [
@@ -145,6 +146,28 @@ final class HttpTransport
         $error = $this->tryParseError($body);
 
         throw new SmobilpayApiException($status, $error, $body);
+    }
+
+    /**
+     * Performs a single HTTP attempt, mapping PSR-18 client failures to
+     * {@see SmobilpayTransportException}.
+     */
+    private function send(\Psr\Http\Message\RequestInterface $request): \Psr\Http\Message\ResponseInterface
+    {
+        $this->logger?->debug('smobilpay.http.request', [
+            'method' => $request->getMethod(),
+            'uri' => (string) $request->getUri(),
+        ]);
+        try {
+            return $this->httpClient->sendRequest($request);
+        } catch (ClientExceptionInterface $e) {
+            $this->logger?->warning('smobilpay.http.transport_error', ['error' => $e->getMessage()]);
+
+            throw new SmobilpayTransportException(
+                'HTTP transport error: ' . $e->getMessage(),
+                $e,
+            );
+        }
     }
 
     private function tryParseError(string $body): ?ApiError

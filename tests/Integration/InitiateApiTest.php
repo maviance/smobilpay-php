@@ -72,4 +72,29 @@ final class InitiateApiTest extends ApiTestCase
         self::assertSame('PI-ENEO-PREPAID-001', $quote->payItemId);
         self::assertSame('0e1f7f4a-3b2c-4a8d-9d1f-1f5d2c3a4b6e', $quote->quoteId->toString());
     }
+
+    public function testQuoteResendsBodyOnRetryAfter401(): void
+    {
+        // POST /v2/quotestd: 401 once, forced re-mint, then 200. The retry must
+        // resend the JSON body (the first attempt consumed the body stream) and
+        // carry a refreshed bearer (MPAY-30042).
+        $this->http->addResponse($this->jsonFixture(401, 'customer-account-401.json'));
+        $this->http->addResponse($this->jsonFixture(200, 'oauth-token.json'));
+        $this->http->addResponse($this->jsonFixture(200, 'quote-response.json'));
+
+        $quote = $this->client->initiate()->quote(new QuoteRequest(5000, 'PI-ENEO-PREPAID-001'));
+        self::assertInstanceOf(QuoteResponse::class, $quote);
+
+        $requests = $this->http->getRequests();
+        // mint, quote(401), re-mint, quote(200)
+        self::assertCount(4, $requests);
+        $retry = $requests[3];
+        self::assertSame('POST', $retry->getMethod());
+        self::assertSame('/v2/quotestd', $retry->getUri()->getPath());
+        self::assertStringStartsWith('Bearer ', $retry->getHeaderLine('Authorization'));
+        self::assertSame(
+            '{"amount":5000,"payItemId":"PI-ENEO-PREPAID-001"}',
+            (string) $retry->getBody(),
+        );
+    }
 }
